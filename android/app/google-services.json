@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "517377863058",
+    "project_id": "flutter-practice-tasks",
+    "storage_bucket": "flutter-practice-tasks.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517377863058:android:e2854899d29b7240ace54b",
+        "android_client_info": {
+          "package_name": "com.example.flutterpractisetasks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA36D0cPbcQcDIFWbJn4eie2hc5uDGRCcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
