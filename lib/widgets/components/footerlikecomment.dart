@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
 class Footerlikecomment extends StatelessWidget {
   final IconData icon_like;

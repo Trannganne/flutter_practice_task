@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/apptoast.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/medium/bloc/articlebloc/article_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/medium/bloc/articlebloc/article_event.dart';
 import 'package:flutterpractisetasks/push_notification/medium/bloc/articlebloc/article_state.dart';

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutterpractisetasks/push_notification/easy/bloc/home_bloc/post_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/easy/bloc/home_bloc/post_event.dart';
 import 'package:flutterpractisetasks/push_notification/easy/bloc/home_bloc/post_state.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/apptoast.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/card.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
+import 'package:flutterpractisetasks/widgets/components/card.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Homescreen extends StatefulWidget {

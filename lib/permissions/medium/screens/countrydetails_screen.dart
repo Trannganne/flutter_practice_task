@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutterpractisetasks/permissions/medium/model/country.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/apptoast.dart';
+import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
 import 'package:flutterpractisetasks/push_notification/medium/services/urlservice.dart';
 
 class CountryDetailScreen extends StatelessWidget {

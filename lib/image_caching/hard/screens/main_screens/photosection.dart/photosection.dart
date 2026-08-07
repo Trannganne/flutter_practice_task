@@ -5,7 +5,7 @@ import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_bloc.dart';
 import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_event.dart';
 import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_state.dart';
 import 'package:flutterpractisetasks/image_caching/hard/screens/grid/photogridview.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:go_router/go_router.dart';
 
 class PhotosSection extends StatefulWidget {

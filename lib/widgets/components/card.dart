@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterpractisetasks/push_notification/easy/models/post.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:go_router/go_router.dart';
 
 class PostCard extends StatelessWidget {

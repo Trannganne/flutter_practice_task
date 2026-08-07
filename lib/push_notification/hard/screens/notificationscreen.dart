@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/hard/bloc/notificationbloc/notification_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/hard/bloc/notificationbloc/notification_event.dart';
 import 'package:flutterpractisetasks/push_notification/hard/bloc/notificationbloc/notification_state.dart';

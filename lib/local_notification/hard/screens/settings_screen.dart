@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterpractisetasks/local_notification/hard/bloc/planner_bloc.dart';
 import 'package:flutterpractisetasks/local_notification/hard/bloc/planner_event.dart';
 import 'package:flutterpractisetasks/local_notification/hard/bloc/planner_state.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/apptoast.dart';
+import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
 
 class HardSettingsScreen extends StatelessWidget {
   const HardSettingsScreen({super.key});

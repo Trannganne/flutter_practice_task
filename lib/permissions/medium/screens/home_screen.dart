@@ -7,7 +7,7 @@ import 'package:flutterpractisetasks/permissions/medium/bloc/country_state.dart'
 import 'package:flutterpractisetasks/permissions/medium/model/country_filter.dart';
 import 'package:flutterpractisetasks/permissions/medium/screens/countrydetails_screen.dart';
 //import 'package:flutterpractisetasks/permissions/model/country.dart'; // model THẬT, không tự khai báo lại
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/apptoast.dart';
+import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
 import 'package:flutterpractisetasks/permissions/medium/core/convert.dart';
 
 // ===================== ENTRY POINT =====================

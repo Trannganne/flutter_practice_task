@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
 class CategoryTab extends StatelessWidget {
   final String category;

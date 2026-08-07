@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/easy/bloc/detail_bloc/detail_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/easy/bloc/detail_bloc/detail_event.dart';
 import 'package:flutterpractisetasks/push_notification/easy/bloc/detail_bloc/detail_state.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/footerlikecomment.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/footerlikecomment.dart';
 
 class Postdetailscreen extends StatefulWidget {
   final int postId;

@@ -9,7 +9,7 @@ import 'package:flutterpractisetasks/image_caching/hard/screens/grid/collection_
 import 'package:flutterpractisetasks/image_caching/models/pexel_collection.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/apptoast.dart';
+import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
 
 class AllCollectionsScreen extends StatefulWidget {
   const AllCollectionsScreen({Key? key}) : super(key: key);

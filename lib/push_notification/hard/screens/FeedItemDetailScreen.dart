@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterpractisetasks/push_notification/easy/screen/components/commonText.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
 import 'package:flutterpractisetasks/push_notification/medium/services/urlservice.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/core/appcolor.dart';
