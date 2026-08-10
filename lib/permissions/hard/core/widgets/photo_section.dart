@@ -9,6 +9,10 @@ class PhotoSection extends StatelessWidget {
   final int photoCount;
   final VoidCallback onTakePhotoPressed;
   final ValueChanged<String> onRemovePhotoPressed;
+  final String title;
+  final Color colorText;
+  final IconData icon;
+  final String content;
 
   const PhotoSection({
     super.key,
@@ -16,6 +20,10 @@ class PhotoSection extends StatelessWidget {
     required this.photoCount,
     required this.onTakePhotoPressed,
     required this.onRemovePhotoPressed,
+    this.title = 'Photo Evidence',
+    this.colorText = Colors.white70,
+    this.icon = Icons.camera_alt,
+    this.content = 'Take photo',
   });
 
   @override
@@ -26,10 +34,10 @@ class PhotoSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Photo Evidence',
+            Text(
+              title,
               style: TextStyle(
-                color: Colors.white70,
+                color: colorText,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -61,19 +69,19 @@ class PhotoSection extends StatelessWidget {
                   onTap: onTakePhotoPressed,
                   borderRadius: BorderRadius.circular(12),
                   child: DashedContainer(
-                    color: Colors.white,
+                    color: colorText,
                     radius: 12,
                     child: Container(
                       height: 100,
                       alignment: Alignment.center,
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.camera_alt, color: Colors.white),
+                          Icon(icon, color: Colors.grey),
                           SizedBox(height: 4),
                           Text(
-                            'Take Photo',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                            content,
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                         ],
                       ),
