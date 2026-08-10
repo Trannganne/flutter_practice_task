@@ -5,9 +5,15 @@ class ImagePickerService {
 
   Future<List<XFile>?> imageButtonPressed(ImageSource source) async {
     try {
+      if (source == ImageSource.gallery) {
+        return await _picker.pickMultiImage();
+      }
+
       final XFile? pickedFile = await _picker.pickImage(source: source);
 
-      return pickedFile == null ? null : <XFile>[pickedFile];
+      if (pickedFile == null) return [];
+
+      return [pickedFile];
     } catch (e) {
       throw Exception('Không thể chọn ảnh: $e');
     }
