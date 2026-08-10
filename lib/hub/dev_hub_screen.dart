@@ -22,9 +22,6 @@ import 'package:flutterpractisetasks/push_notification/medium/services/notificat
 import 'package:flutterpractisetasks/push_notification/hard/services/notification_service.dart'
     as hard_push_noti;
 
-import 'package:flutterpractisetasks/hub/app_router/app_router.dart'
-    as hard_image_caching;
-
 // ===================== LOCAL NOTIFICATION =====================
 import 'package:flutterpractisetasks/local_notification/router/approutes.dart'
     as local_router;
@@ -38,6 +35,13 @@ import 'package:flutterpractisetasks/local_notification/hard/services/notificati
 // ===================== PERMISSION =====================
 import 'package:flutterpractisetasks/permissions/router/app_router.dart'
     as per_router;
+
+// Image caching/ picker
+import 'package:flutterpractisetasks/hub/app_router/app_router.dart'
+    as hard_image_caching;
+
+import 'package:flutterpractisetasks/file_picker/filerouter/uploadapp.dart'
+    as hard_file_picker;
 
 /// Màn hình gốc của app: gom toàn bộ 6 bài tập (Easy/Medium/Hard x
 /// Push Notification(FCM)/Local Notification) vào 1 nơi duy nhất, thay vì
@@ -321,6 +325,26 @@ class _DevHubScreenState extends State<DevHubScreen>
                   create: (_) => ConnectivityCubit(ConnectivityService()),
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Image/ File Picker
+          FeatureCard(
+            title: 'Reliable Media Uploader',
+            subtitle:
+                'Làm uploader gần production: 2 API upload, queue offline, retry, progress, fallback provider và UX mượt.',
+            badgeText: 'Hard · 6-8h',
+            badgeColor: Colors.red.shade600,
+            icon: Icons.dashboard_customize_rounded,
+            isLoading: _loadingKey == 'file_hard',
+            onTap: () => _openModule(
+              key: 'file_hard',
+              beforeOpen: () async {},
+              title: 'File/ Image Picker (Hard)',
+              routerConfig: hard_file_picker.UploadAppRouter.createRouter(),
+              providers: [],
             ),
           ),
         ],
