@@ -3,7 +3,7 @@ import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
 import 'package:flutterpractisetasks/image_caching/hard/services/local_storage/databasehelper.dart';
 import 'package:sqflite/sqflite.dart';
 
-class Photolocaldb {
+class UploadLocaldb {
   Future<Database> get _db async => Databasehelper.instance.database;
 
   // Private Helper
