@@ -111,21 +111,20 @@ class UploadLocaldb {
   }
 
   // Lấy danh sách task đang upload(uploading) hoặc treo( pending)
-  Future<List<UploadModel>?> getUploadingOrPending() async {
-    await Future.delayed(Duration(milliseconds: 10));
-
+  Future<List<UploadModel>> getUploadingOrPending() async {
     final db = await _db;
     try {
       final json = await db.query(
         'upload_tasks',
-        where: 'status in(?,?)',
-        whereArgs: [UploadStatus.pending, UploadStatus.uploading],
+        where: 'status IN(?,?)',
+        whereArgs: [UploadStatus.pending.name, UploadStatus.uploading.name],
+        orderBy: 'createdAt ASC',
       );
       final tasks = json.map((j) => UploadModel.fromJson(j)).toList();
       return tasks;
     } catch (e) {
       debugPrint('Lấy danh sách thất bại!');
-      return null;
+      return [];
     }
   }
 }
