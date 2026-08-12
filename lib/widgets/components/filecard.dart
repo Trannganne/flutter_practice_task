@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
 class FileCard extends StatelessWidget {
   final String title;
   final String status;
   final int width;
   final int height;
-  final double dungLuong; // Dung lượng (MB)
+  final double fileSize; // Dung lượng (MB)
   final String? imagePath; // Đường dẫn file ảnh
   final double progress; // Tiến độ từ 0.0 -> 1.0 (ví dụ: 1.0 là 100%)
   final VoidCallback? onCopyPressed;
@@ -17,7 +18,7 @@ class FileCard extends StatelessWidget {
     required this.status,
     required this.width,
     required this.height,
-    required this.dungLuong,
+    required this.fileSize,
     this.imagePath,
     this.progress = 1.0,
     this.onCopyPressed,
@@ -25,10 +26,15 @@ class FileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = status == 'Loading';
+    final isPending = status == 'Pending';
+    final isDone = status == 'Done';
+    final isFailed = status == 'Failed';
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        //   color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -73,7 +79,7 @@ class FileCard extends StatelessWidget {
 
                 // Dung lượng & Kích thước (MB • W x H)
                 Text(
-                  '${dungLuong.toStringAsFixed(1)} MB • $width x $height',
+                  '${fileSize.toStringAsFixed(1)} MB • $width x $height',
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 const SizedBox(height: 8),
@@ -87,8 +93,12 @@ class FileCard extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progress,
                           backgroundColor: Colors.grey[200],
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.green,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isDone
+                                ? Colors.green
+                                : isFailed
+                                ? Colors.red
+                                : Colors.blueAccent,
                           ),
                           minHeight: 6,
                         ),
@@ -115,14 +125,17 @@ class FileCard extends StatelessWidget {
             children: [
               // Trạng thái Done
               if (status.isNotEmpty) ...[
-                const Icon(Icons.check_circle, color: Colors.green, size: 16),
+                Icon(
+                  isDone ? Icons.check_circle : Icons.refresh,
+                  color: isDone ? Colors.green : Colors.red,
+                  size: 16,
+                ),
                 const SizedBox(width: 4),
-                Text(
-                  status,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Commontext(
+                  title: status,
+                  fontSize: '12',
+                  fontWeight: FontWeight.w500,
+                  colorText: isDone ? Colors.grey : Colors.red,
                 ),
                 const SizedBox(width: 8),
               ],
@@ -131,7 +144,11 @@ class FileCard extends StatelessWidget {
               IconButton(
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(6),
-                icon: const Icon(Icons.copy, size: 18, color: Colors.grey),
+                icon: Icon(
+                  isDone ? Icons.copy : Icons.refresh,
+                  size: isDone ? 18 : 24,
+                  color: isDone ? Colors.grey : Colors.blue,
+                ),
                 onPressed: onCopyPressed,
               ),
             ],

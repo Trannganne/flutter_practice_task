@@ -12,19 +12,33 @@ class CustomTabBar extends StatelessWidget {
     this.labelColor = Colors.white,
     required this.labels,
     this.icons,
-  }) : assert(
-         labels.length == icons?.length,
-         'labels và icons phải có cùng độ dài',
-       );
+  });
+  //  : assert(
+  //        labels.length == icons?.length,
+  //        'labels và icons phải có cùng độ dài',
+  //      );
 
   @override
   Widget build(BuildContext context) {
-    return TabBar(
-      controller: tabController,
-      labelColor: labelColor,
-      tabs: List.generate(labels.length, (index) {
-        return Tab(icon: Icon(icons?[index]), text: labels[index]);
-      }),
+    return Container(
+      color: Colors.black,
+      child: TabBar(
+        controller: tabController,
+        labelColor: labelColor,
+        unselectedLabelColor: Colors.grey,
+        indicatorColor: Colors.blue,
+        tabs: List.generate(labels.length, (index) {
+          return Tab(icon: Icon(icons?[index]), text: labels[index]);
+        }),
+      ),
     );
+
+    // TabBar(
+    //   controller: tabController,
+    //   labelColor: labelColor,
+    //   tabs: List.generate(labels.length, (index) {
+    //     return Tab(icon: Icon(icons?[index]), text: labels[index]);
+    //   }),
+    // );
   }
 }
