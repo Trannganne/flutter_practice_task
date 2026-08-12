@@ -7,7 +7,7 @@ class FileCard extends StatelessWidget {
   final String status;
   final int width;
   final int height;
-  final double fileSize; // Dung lượng (MB)
+  final String fileSize; // Dung lượng (MB)
   final String? imagePath; // Đường dẫn file ảnh
   final double progress; // Tiến độ từ 0.0 -> 1.0 (ví dụ: 1.0 là 100%)
   final VoidCallback? onCopyPressed;
@@ -79,7 +79,7 @@ class FileCard extends StatelessWidget {
 
                 // Dung lượng & Kích thước (MB • W x H)
                 Text(
-                  '${fileSize.toStringAsFixed(1)} MB • $width x $height',
+                  '$fileSize • $width x $height',
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 const SizedBox(height: 8),
