@@ -37,7 +37,11 @@ class UploadLocalDatabase {
           remoteUrl TEXT NOT NULL,
           retryCount INTEGER DEFAULT 0,
           createdAt INTEGER NOT NULL ,
-          updatedAt INTEGER NOT NULL
+          updatedAt INTEGER NOT NULL,
+          progress REAL DEFAULT 0,
+          width INTEGER,
+          height INTEGER,
+          sizeByte INTEGER
           )
           ''');
 
