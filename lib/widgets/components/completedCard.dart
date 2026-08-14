@@ -7,7 +7,7 @@ class Completedcard extends StatelessWidget {
   final String sourcePath;
   final String? imagePath; // Đường dẫn file ảnh
   final VoidCallback? onCopyPressed;
-  final String completedAt;
+  final int completedAt;
 
   const Completedcard({
     Key? key,
@@ -86,7 +86,7 @@ class Completedcard extends StatelessWidget {
             children: [
               // Thời gian hoàn thành
               Commontext(
-                title: completedAt,
+                title: '$completedAt',
                 colorText: Colors.grey,
                 fontSize: '12',
               ),
