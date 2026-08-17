@@ -9,6 +9,7 @@ abstract class UploadProvider {
   Future<UploadResult> upload(
     File file, {
     void Function(double percent)? onProgress,
+    CancelToken? cancelToken,
   });
 }
 
@@ -20,6 +21,7 @@ class ImgBBProvider implements UploadProvider {
   Future<UploadResult> upload(
     File file, {
     void Function(double percent)? onProgress,
+    CancelToken? cancelToken, // Trường hợp hủy upload
   }) async {
     final apiKey = dotenv.env['IMGBB_API_KEY'];
     final dio = Dio();
@@ -32,6 +34,7 @@ class ImgBBProvider implements UploadProvider {
       onSendProgress: (sent, total) {
         if (total > 0) onProgress?.call(sent / total);
       },
+      cancelToken: cancelToken,
     );
     final imageData = response.data['data'];
 
@@ -55,6 +58,9 @@ class FreeImageProvider implements UploadProvider {
   Future<UploadResult> upload(
     File file, {
     void Function(double percent)? onProgress,
+
+    // Trong trường hợp hủy upload
+    CancelToken? cancelToken,
   }) async {
     final dio = Dio();
 
@@ -68,6 +74,7 @@ class FreeImageProvider implements UploadProvider {
       onSendProgress: (sent, total) {
         if (total > 0) onProgress?.call(sent / total);
       },
+      cancelToken: cancelToken,
     );
     final imageData = response.data['image'];
     return UploadResult(
