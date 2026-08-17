@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
 class FileCard extends StatelessWidget {
@@ -11,6 +12,7 @@ class FileCard extends StatelessWidget {
   final String? imagePath; // Đường dẫn file ảnh
   final double progress; // Tiến độ từ 0.0 -> 1.0 (ví dụ: 1.0 là 100%)
   final VoidCallback? onCopyPressed;
+  final VoidCallback? onCancelPressed;
 
   const FileCard({
     Key? key,
@@ -22,15 +24,18 @@ class FileCard extends StatelessWidget {
     this.imagePath,
     this.progress = 1.0,
     this.onCopyPressed,
+    this.onCancelPressed,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = status == 'Loading';
-    final isPending = status == 'Pending';
-    final isDone = status == 'Done';
-    final isFailed = status == 'Failed';
+    final isUploading = status == UploadStatus.uploading.name;
+    final isPending = status == UploadStatus.pending.name;
+    final isDone = status == UploadStatus.Done.name;
+    final isFailed = status == UploadStatus.failed.name;
 
+    debugPrint('trạng thái hiện tại: $status');
+    debugPrint('Tiến trình hiện tại: $progress');
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -126,18 +131,32 @@ class FileCard extends StatelessWidget {
               // Trạng thái Done
               if (status.isNotEmpty) ...[
                 Icon(
-                  isDone ? Icons.check_circle : Icons.refresh,
-                  color: isDone ? Colors.green : Colors.red,
+                  isDone
+                      ? Icons.check_circle
+                      : isFailed
+                      ? Icons.error_outline
+                      : isPending
+                      ? Icons.schedule
+                      : null,
+                  color: isDone
+                      ? Colors.green
+                      : isUploading
+                      ? null
+                      : Colors.red,
                   size: 16,
                 ),
                 const SizedBox(width: 4),
                 Commontext(
-                  title: status,
+                  title: isUploading ? '' : status,
                   fontSize: '12',
                   fontWeight: FontWeight.w500,
                   colorText: isDone ? Colors.grey : Colors.red,
                 ),
                 const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(isUploading ? Icons.pause : null),
+                ),
               ],
 
               // Icon Action (Copy / Option)
@@ -145,11 +164,15 @@ class FileCard extends StatelessWidget {
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(6),
                 icon: Icon(
-                  isDone ? Icons.copy : Icons.refresh,
+                  isDone
+                      ? Icons.copy
+                      : isUploading
+                      ? Icons.cancel
+                      : Icons.refresh,
                   size: isDone ? 18 : 24,
                   color: isDone ? Colors.grey : Colors.blue,
                 ),
-                onPressed: onCopyPressed,
+                onPressed: isUploading ? onCancelPressed : onCopyPressed,
               ),
             ],
           ),

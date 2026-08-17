@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutterpractisetasks/file_picker/core/utils/time_formatter.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
 class Completedcard extends StatelessWidget {
@@ -86,7 +87,7 @@ class Completedcard extends StatelessWidget {
             children: [
               // Thời gian hoàn thành
               Commontext(
-                title: '$completedAt',
+                title: TimeFormatter().formatTimeAgo(completedAt),
                 colorText: Colors.grey,
                 fontSize: '12',
               ),
