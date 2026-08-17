@@ -1,39 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
-import 'package:flutterpractisetasks/image_caching/hard/services/local_storage/databasehelper.dart';
+import 'package:flutterpractisetasks/file_picker/services/localstorage/databasehelper.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UploadLocaldb {
-  Future<Database> get _db async => Databasehelper.instance.database;
-
-  // Private Helper
-  Map<String, dynamic> _toMap(UploadModel item) {
-    return {
-      'id': item.id,
-      'filePath': item.filePath,
-      'fileHash': item.fileHash,
-      'provider': item.provider,
-      'status': item.status,
-      'remoteUrl': item.remoteUrl,
-      'retryCount': item.retryCount,
-      'createdAt': DateTime.now().toIso8601String(),
-      'updatedAt': item.updatedAt,
-    };
-  }
-
-  UploadModel _fromMap(Map<String, dynamic> map) {
-    return UploadModel(
-      id: map['id'] as String,
-      filePath: map['filePath'] as String,
-      fileHash: map['fileHash'] as String,
-      provider: ProviderType.values.byName(map['provider'] as String),
-      status: UploadStatus.values.byName(map['source'] as String),
-      createdAt: map['height'] as int,
-      updatedAt: map['width'] as int,
-      retryCount: map['retryCountr'] as int,
-      remoteUrl: map['remoteUrl'] as String,
-    );
-  }
+  Future<Database> get _db async => UploadLocalDatabase.instance.database;
 
   Map<String, dynamic> _toMapHistory(String id) {
     return {'task_id': id, 'uploadedAt': DateTime.now().toIso8601String()};
@@ -47,8 +18,20 @@ class UploadLocaldb {
                         INNER JOIN history h on h.task_id=t.id
                       ''');
     return maps
-        .map((m) => _fromMap(m).copyWith(status: UploadStatus.success))
+        .map((m) => UploadModel.fromJson(m).copyWith(status: UploadStatus.Done))
         .toList();
+  }
+
+  // Xóa task
+  Future<bool> deleteUploadTask({required String id}) async {
+    final db = await _db;
+    try {
+      await db.delete('upload_tasks', where: 'id=?', whereArgs: [id]);
+      return true;
+    } catch (e) {
+      debugPrint('Xóa task thất bại!: $e');
+      return false;
+    }
   }
 
   Future<bool> addUploadTask({required UploadModel item}) async {
@@ -59,7 +42,7 @@ class UploadLocaldb {
     try {
       await db.insert(
         'upload_tasks',
-        _toMap(item),
+        item.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
       return true;
@@ -99,13 +82,47 @@ class UploadLocaldb {
     try {
       await db.update(
         'upload_tasks',
-        {'status': status, 'updatedAt': DateTime.now().millisecondsSinceEpoch},
+        {
+          'status': status.name,
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
+        },
         where: 'id=?',
         whereArgs: [id],
       );
+      debugPrint(
+        'Cập nhật trạng thái upload thành công: hiện tại là ${status.name}',
+      );
       return true;
     } catch (e) {
-      debugPrint('Cập nhật trạng thái upload thất bại!');
+      debugPrint('Cập nhật trạng thái upload thất bại: $e');
+      return false;
+    }
+  }
+
+  // Cập nhật thông tin 1 task
+
+  //Cập nhập trạng thái upload
+  Future<bool> updateTask({
+    required String id,
+    required UploadModel item,
+  }) async {
+    await Future.delayed(Duration(microseconds: 200));
+
+    final db = await _db;
+    try {
+      await db.update(
+        'upload_tasks',
+        item.toJson(),
+
+        where: 'id=?',
+        whereArgs: [id],
+      );
+      debugPrint(
+        'Cập nhật upload model thành công: hiện tại là ${item.status.name}',
+      );
+      return true;
+    } catch (e) {
+      debugPrint('Cập nhật upload model thất bại: $e');
       return false;
     }
   }
@@ -123,8 +140,68 @@ class UploadLocaldb {
       final tasks = json.map((j) => UploadModel.fromJson(j)).toList();
       return tasks;
     } catch (e) {
-      debugPrint('Lấy danh sách thất bại!');
+      debugPrint('Lấy danh sách thất bại: $e');
       return [];
+    }
+  }
+
+  // Tìm hash ( kiểm tra trùng)
+  Future<UploadModel?> findByHash(String hash) async {
+    final db = await _db;
+
+    try {
+      final rows = await db.query(
+        'upload_tasks',
+        where: 'fileHash =?',
+        whereArgs: [hash],
+      );
+      if (rows.isEmpty) return null;
+      return UploadModel.fromJson(rows.first);
+    } catch (e) {
+      debugPrint("Lỗi khi lấy dữ liệu hash: $e");
+      return null;
+    }
+  }
+
+  // Lấy danh sách tasks (file) đã hoàn tất upload
+  Future<List<UploadModel>?> getCompletedTasks({
+    required int limit,
+    required int offset,
+  }) async {
+    final db = await _db;
+
+    try {
+      final rows = await db.query(
+        'upload_tasks',
+        where: 'status=?',
+        whereArgs: [UploadStatus.Done.name],
+        orderBy: 'updatedAt DESC',
+        limit: limit,
+        offset: offset,
+      );
+      if (rows.isEmpty) return null;
+      return rows.map((row) => UploadModel.fromJson(row)).toList();
+    } catch (e) {
+      debugPrint('Lỗi khi lấy danh sách file đã upload: $e');
+      return null;
+    }
+  }
+
+  // Lấy task theo id
+
+  Future<UploadModel?> getTaskById(String id) async {
+    final db = await _db;
+    try {
+      final row = await db.query(
+        'upload_tasks',
+        where: 'id=?',
+        whereArgs: [id],
+      );
+      if (row.isEmpty) return null;
+      return UploadModel.fromJson(row.first);
+    } catch (e) {
+      debugPrint('Lỗi khi lấy task theo id: $e');
+      return null;
     }
   }
 }
