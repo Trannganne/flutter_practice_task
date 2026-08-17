@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
 import 'package:image_picker/image_picker.dart';
 
 abstract class FileEvent extends Equatable {
@@ -29,4 +30,27 @@ class RemoveFileEvent extends FileEvent {
   RemoveFileEvent(this.url);
   @override
   List<Object?> get props => [url];
+}
+
+class UploadQueueStarted extends FileEvent {}
+
+class UploadTaskStarted extends FileEvent {
+  final UploadModel task;
+
+  UploadTaskStarted(this.task);
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadCompletedTasks extends FileEvent {}
+
+class LoadMoreCompletedTasks extends FileEvent {}
+
+class ConnectivityRestored extends FileEvent {}
+
+class CancelUploadEvent extends FileEvent {
+  final String taskId;
+  CancelUploadEvent(this.taskId);
+  @override
+  List<Object?> get props => [taskId];
 }
