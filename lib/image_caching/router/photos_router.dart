@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterpractisetasks/hub/app_router/navigatorkey.dart';
+import 'package:flutterpractisetasks/hub/app_router/navigator_key.dart';
 import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_bloc.dart';
 import 'package:flutterpractisetasks/image_caching/hard/screens/main_screens/collections/allcollectionscreen.dart';
 import 'package:flutterpractisetasks/image_caching/hard/screens/main_screens/collections/collections_details.dart';
