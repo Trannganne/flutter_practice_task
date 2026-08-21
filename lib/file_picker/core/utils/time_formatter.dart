@@ -22,10 +22,21 @@ class TimeFormatter {
     return '${years}y ago';
   }
 
-  String formatDuration(Duration duration) {
-    final minutes = duration.inMinutes;
-    final seconds = duration.inSeconds % 60;
+  String formatDuration(int seconds) {
+    final duration = Duration(seconds: seconds);
 
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+    final minutes = duration.inMinutes;
+    final remainingSeconds = duration.inSeconds % 60;
+
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  Duration parseDuration(String duration) {
+    final parts = duration.split(':');
+
+    final minutes = int.parse(parts[0]);
+    final seconds = int.parse(parts[1]);
+
+    return Duration(minutes: minutes, seconds: seconds);
   }
 }
