@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterpractisetasks/widgets/components/mediatasktile.dart';
+import 'package:flutterpractisetasks/widgets/components/media_task_tile.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
