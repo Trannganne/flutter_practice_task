@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -44,8 +46,8 @@ class MediaTaskTile extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: imageUrl != null
-                  ? Image.network(
-                      imageUrl!,
+                  ? Image.file(
+                      File(imageUrl!),
                       width: 48,
                       height: 48,
                       fit: BoxFit.cover,
