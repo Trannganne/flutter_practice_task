@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/pexel_search_result.dart';
 
-class PexelApi {
-  static final apiKey = dotenv.env['PEXELS_API_KEY'];
+class PexelModelApi {
+  static final apiKey = dotenv.env['PEXEL_API_KEY'];
   static final Dio _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 10),
