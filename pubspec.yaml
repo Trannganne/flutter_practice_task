@@ -47,6 +47,7 @@ dependencies:
   uuid: ^4.6.0
   mime: ^2.0.0
   chewie: ^1.14.1
+  wakelock_plus: ^1.6.1
 
 dev_dependencies:
   flutter_test:
