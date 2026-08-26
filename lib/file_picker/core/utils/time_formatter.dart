@@ -22,15 +22,6 @@ class TimeFormatter {
     return '${years}y ago';
   }
 
-  String formatDuration(int seconds) {
-    final duration = Duration(seconds: seconds);
-
-    final minutes = duration.inMinutes;
-    final remainingSeconds = duration.inSeconds % 60;
-
-    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
-  }
-
   Duration parseDuration(String duration) {
     final parts = duration.split(':');
 
@@ -38,5 +29,11 @@ class TimeFormatter {
     final seconds = int.parse(parts[1]);
 
     return Duration(minutes: minutes, seconds: seconds);
+  }
+
+  String formatDuration(int totalSeconds) {
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 }
