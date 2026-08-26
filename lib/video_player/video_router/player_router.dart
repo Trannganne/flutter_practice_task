@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutterpractisetasks/file_picker/screens/mainscreens/uploadpage.dart';
 import 'package:flutterpractisetasks/hub/app_routes/app_routes.dart';
 import 'package:flutterpractisetasks/image_caching/hard/screens/placeholder/placeholder.dart';
-import 'package:flutterpractisetasks/video_player/data/pages/mainpages/homepage.dart';
+import 'package:flutterpractisetasks/video_player/data/pages/main_pages/home_page.dart';
+import 'package:flutterpractisetasks/video_player/data/pages/main_pages/search_screen.dart';
 import 'package:flutterpractisetasks/widgets/mainwrapper/customainwrapper.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +15,10 @@ class PlayerRouter {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Explore'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Bookmarks',
+          ),
         ],
       ),
       branches: [
@@ -35,7 +40,7 @@ class PlayerRouter {
               path: AppRoutes.exploreVideo,
               builder: (context, state) {
                 debugPrint('Explore Route');
-                return const Uploadpage();
+                return const SearchScreen();
               },
             ),
           ],
