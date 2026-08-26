@@ -22,19 +22,23 @@ class ErrorRetryBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer.withOpacity(0.4),
+        color: Colors.redAccent.withOpacity(0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.error.withOpacity(0.3)),
+        border: Border.all(color: Colors.redAccent.withOpacity(0.2)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.center, // Căn giữa các phần tử theo chiều dọc
         children: [
+          // Icon bên trái
           Icon(
             Icons.error_outline_rounded,
             color: theme.colorScheme.error,
             size: 28,
           ),
           const SizedBox(width: 12),
+
+          // Phần văn bản ở giữa
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +49,7 @@ class ErrorRetryBanner extends StatelessWidget {
                     title!,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onErrorContainer,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -53,28 +57,26 @@ class ErrorRetryBanner extends StatelessWidget {
                 Text(
                   message,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onErrorContainer.withOpacity(0.8),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton.icon(
-                    onPressed: onRetry,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: theme.colorScheme.error,
-                      foregroundColor: theme.colorScheme.onError,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                    ),
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(retryText),
+                    color: Colors.redAccent.withOpacity(0.8),
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 12),
+
+          // Nút Retry nằm ngang hàng bên phải
+          FilledButton(
+            onPressed: onRetry,
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(retryText),
           ),
         ],
       ),
