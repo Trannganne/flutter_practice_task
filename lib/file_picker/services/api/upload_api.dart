@@ -28,7 +28,7 @@ class Uploadapi {
       final remoteUrl = data['url'] as String;
 
       final updatedTask = task.copyWith(
-        status: UploadStatus.Done,
+        status: UploadStatus.done,
         remoteUrl: remoteUrl,
         updatedAt: DateTime.now().millisecondsSinceEpoch,
       );
