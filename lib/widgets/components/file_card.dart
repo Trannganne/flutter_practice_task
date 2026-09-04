@@ -31,7 +31,7 @@ class FileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUploading = status == UploadStatus.uploading.name;
     final isPending = status == UploadStatus.pending.name;
-    final isDone = status == UploadStatus.Done.name;
+    final isDone = status == UploadStatus.done.name;
     final isFailed = status == UploadStatus.failed.name;
 
     debugPrint('trạng thái hiện tại: $status');
