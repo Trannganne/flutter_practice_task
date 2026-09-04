@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterpractisetasks/video_player/video_router/playerrouter.dart';
+import 'package:flutterpractisetasks/video_player/video_router/player_router.dart';
 import 'package:go_router/go_router.dart';
 
 class PlayerAppRouter {
