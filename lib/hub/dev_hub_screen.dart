@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterpractisetasks/connectivity_check/connectivity_service.dart';
 import 'package:flutterpractisetasks/connectivity_check/cubit/connectivity_cubit.dart';
+import 'package:flutterpractisetasks/file_picker/bloc/file_bloc.dart';
+import 'package:flutterpractisetasks/file_picker/data/datasources/upload_provider.dart';
+import 'package:flutterpractisetasks/file_picker/data/repository/upload_repository_impl.dart';
+import 'package:flutterpractisetasks/file_picker/services/localstorage/localdb.dart';
 import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_bloc.dart';
 import 'package:flutterpractisetasks/permissions/medium/screens/home_screen.dart';
+import 'package:flutterpractisetasks/video_player/bloc/history_bloc/history_bloc.dart';
+import 'package:flutterpractisetasks/video_player/bloc/popular_bloc/popular_bloc.dart';
+import 'package:flutterpractisetasks/video_player/bloc/search_bloc/search_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutterpractisetasks/hub/widgets/feature_card.dart';
 import 'package:flutterpractisetasks/hub/widgets/module_host.dart';
@@ -36,12 +43,18 @@ import 'package:flutterpractisetasks/local_notification/hard/services/notificati
 import 'package:flutterpractisetasks/permissions/router/app_router.dart'
     as per_router;
 
+import 'package:flutterpractisetasks/permissions/hard/router/permission_app.dart'
+    as per_hard_router;
+
 // Image caching/ picker
 import 'package:flutterpractisetasks/hub/app_router/app_router.dart'
     as hard_image_caching;
 
-import 'package:flutterpractisetasks/file_picker/filerouter/uploadapp.dart'
+import 'package:flutterpractisetasks/file_picker/file_router/upload_app.dart'
     as hard_file_picker;
+
+import 'package:flutterpractisetasks/video_player/video_router/player_app.dart'
+    as hard_video_player;
 
 /// Màn hình gốc của app: gom toàn bộ 6 bài tập (Easy/Medium/Hard x
 /// Push Notification(FCM)/Local Notification) vào 1 nơi duy nhất, thay vì
@@ -288,7 +301,7 @@ class _DevHubScreenState extends State<DevHubScreen>
                 await hard_push_noti.NotificationService.initialize();
               },
               title: 'Notification Center (Hard)',
-              routerConfig: hard_push_router.AppRoutes.createRouter(),
+              routerConfig: per_hard_router.PermissionAppRouter.createRouter(),
             ),
           ),
         ],
@@ -344,7 +357,41 @@ class _DevHubScreenState extends State<DevHubScreen>
               beforeOpen: () async {},
               title: 'File/ Image Picker (Hard)',
               routerConfig: hard_file_picker.UploadAppRouter.createRouter(),
-              providers: [],
+              providers: [
+                BlocProvider<FileBloc>(
+                  create: (_) => FileBloc(
+                    UploadRepositoryImpl(
+                      localDb: UploadLocaldb(),
+                      primary: ImgBBProvider(),
+                      fallback: FreeImageProvider(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Video player
+          FeatureCard(
+            title: 'Production Video Explorer',
+            subtitle:
+                'Làm video app gần production: 2 API, pagination, cache metadata, player UX, fallback video source, error handling.',
+            badgeText: 'Hard · 6-8h',
+            badgeColor: Colors.red.shade600,
+            icon: Icons.dashboard_customize_rounded,
+            isLoading: _loadingKey == 'player_hard',
+            onTap: () => _openModule(
+              key: 'player_hard',
+              beforeOpen: () async {},
+              title: 'Video player(Hard)',
+              routerConfig: hard_video_player.PlayerAppRouter.createRouter(),
+              providers: [
+                BlocProvider<HistoryBloc>(create: (_) => HistoryBloc()),
+                BlocProvider<SearchBloc>(create: (_) => SearchBloc()),
+                BlocProvider<PopularBloc>(create: (_) => PopularBloc()),
+              ],
             ),
           ),
         ],
