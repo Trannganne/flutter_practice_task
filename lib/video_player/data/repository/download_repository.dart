@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutterpractisetasks/video_player/models/video_entity_model.dart';
 import 'cache_metadata_repository.dart';
@@ -32,13 +33,14 @@ class DownloadRepository {
 
     final dir = await getApplicationDocumentsDirectory();
     final videosDir = Directory('${dir.path}/downloaded_videos');
+    debugPrint("Đường dẫn:  ${dir.path}");
     await videosDir.create(recursive: true);
 
     final ext = _extractExtension(video.videoSources.first);
     // Tên file theo source+id — không đụng độ giữa Pexels/Pixabay dù 2 API
     // có thể trùng số id.
     final savePath = '${videosDir.path}/${video.source.name}_${video.id}$ext';
-
+    debugPrint("Đường dẫn:  $savePath");
     await _dio.download(
       video.videoSources.first,
       savePath,
