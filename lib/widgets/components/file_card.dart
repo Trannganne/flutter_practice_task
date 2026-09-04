@@ -1,9 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutterpractisetasks/file_picker/bloc/file_bloc.dart';
+import 'package:flutterpractisetasks/file_picker/bloc/file_event.dart';
 import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
 class FileCard extends StatelessWidget {
+  final String taskId; // ID của task upload
   final String title;
   final String status;
   final int width;
@@ -16,6 +20,7 @@ class FileCard extends StatelessWidget {
 
   const FileCard({
     Key? key,
+    required this.taskId,
     required this.title,
     required this.status,
     required this.width,
@@ -33,6 +38,7 @@ class FileCard extends StatelessWidget {
     final isPending = status == UploadStatus.pending.name;
     final isDone = status == UploadStatus.done.name;
     final isFailed = status == UploadStatus.failed.name;
+    final wasPaused = status == UploadStatus.paused.name;
 
     debugPrint('trạng thái hiện tại: $status');
     debugPrint('Tiến trình hiện tại: $progress');
@@ -154,8 +160,22 @@ class FileCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: () {},
-                  icon: Icon(isUploading ? Icons.pause : null),
+                  onPressed: () {
+                    if (isUploading) {
+                      // Gửi sự kiện PauseUploadEvent
+                      context.read<FileBloc>().add(PauseUploadEvent(taskId));
+                    } else if (wasPaused) {
+                      // Gửi sự kiện ResumeUploadEvent
+                      context.read<FileBloc>().add(ResumeUploadEvent(taskId));
+                    }
+                  },
+                  icon: Icon(
+                    isUploading
+                        ? Icons.pause
+                        : wasPaused
+                        ? Icons.play_arrow
+                        : null,
+                  ),
                 ),
               ],
 
