@@ -1,8 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterpractisetasks/file_picker/bloc/file_bloc.dart';
-import 'package:flutterpractisetasks/file_picker/bloc/file_event.dart';
 import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 
@@ -17,9 +14,12 @@ class FileCard extends StatelessWidget {
   final double progress; // Tiến độ từ 0.0 -> 1.0 (ví dụ: 1.0 là 100%)
   final VoidCallback? onCopyPressed;
   final VoidCallback? onCancelPressed;
+  final VoidCallback? onPausePressed;
+  final VoidCallback? onResumePressed;
 
   const FileCard({
     Key? key,
+
     required this.taskId,
     required this.title,
     required this.status,
@@ -30,6 +30,8 @@ class FileCard extends StatelessWidget {
     this.progress = 1.0,
     this.onCopyPressed,
     this.onCancelPressed,
+    this.onPausePressed,
+    this.onResumePressed,
   }) : super(key: key);
 
   @override
@@ -163,10 +165,15 @@ class FileCard extends StatelessWidget {
                   onPressed: () {
                     if (isUploading) {
                       // Gửi sự kiện PauseUploadEvent
-                      context.read<FileBloc>().add(PauseUploadEvent(taskId));
+                      debugPrint('Đã nhấn nút pause cho taskId: $taskId');
+                      debugPrint(
+                        '[FileCard] Callback tồn tại: ${onPausePressed != null}',
+                      );
+                      onPausePressed?.call();
                     } else if (wasPaused) {
                       // Gửi sự kiện ResumeUploadEvent
-                      context.read<FileBloc>().add(ResumeUploadEvent(taskId));
+                      debugPrint('Đã nhấn nút resume cho taskId: $taskId');
+                      onResumePressed?.call();
                     }
                   },
                   icon: Icon(
@@ -188,6 +195,8 @@ class FileCard extends StatelessWidget {
                       ? Icons.copy
                       : isUploading
                       ? Icons.cancel
+                      : wasPaused
+                      ? null
                       : Icons.refresh,
                   size: isDone ? 18 : 24,
                   color: isDone ? Colors.grey : Colors.blue,
