@@ -181,6 +181,37 @@ class ArticleBanner extends StatelessWidget {
             ),
 
             Positioned(
+              top: 12,
+              right: 24,
+              child: Container(
+                width: 32,
+                height: 32,
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    Icons.bookmark_outline,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {},
+                ),
+              ),
+            ),
+
+            Positioned(
               left: 16,
               right: 16,
               bottom: 42,

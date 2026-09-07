@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/core/appcolor.dart';
 
 class Feedcard extends StatelessWidget {
