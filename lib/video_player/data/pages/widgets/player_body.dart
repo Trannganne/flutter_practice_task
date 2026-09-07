@@ -4,10 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterpractisetasks/video_player/bloc/player_bloc/playback_cubit.dart';
 import 'package:flutterpractisetasks/video_player/bloc/player_bloc/playback_state.dart';
 import 'package:flutterpractisetasks/video_player/data/pages/widgets/error_retry_banner.dart';
+import 'package:flutterpractisetasks/video_player/data/pages/widgets/player_controls_overlay.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class PlayerBody extends StatefulWidget {
-  const PlayerBody({super.key});
+  // Cần 2 tham số này để PlayerControlsOverlay vẽ đúng icon fullscreen +
+  // gọi được đúng hàm toggle từ VideoPlayerScreen (chủ sở hữu thật của
+  // trạng thái dọc/ngang) — PlayerBody không tự giữ state đó.
+  final bool isExpanded;
+  final VoidCallback onToggleExpand;
+
+  const PlayerBody({
+    super.key,
+    required this.isExpanded,
+    required this.onToggleExpand,
+  });
 
   @override
   State<PlayerBody> createState() => _PlayerBodyState();
@@ -38,14 +49,13 @@ class _PlayerBodyState extends State<PlayerBody> {
       videoPlayerController: controller,
       autoPlay: true,
       looping: false,
-      // Đã ở màn hình fullscreen riêng (VideoPlayerScreen tự khoá
-      // orientation), không cần Chewie lồng thêm 1 lớp fullscreen nữa.
       allowFullScreen: false,
       allowedScreenSleep: false,
-      showControls: true,
-      materialProgressColors: ChewieProgressColors(
-        playedColor: Theme.of(context).colorScheme.primary,
-      ),
+      // TẮT control bar mặc định của Chewie — thay bằng
+      // PlayerControlsOverlay tự vẽ ở dưới, để progress bar + nút
+      // fullscreen dùng chung 1 trạng thái ẩn/hiện (Chewie không cho
+      // đồng bộ với widget bên ngoài nó).
+      showControls: false,
     );
     _boundControllerKey = controller;
   }
@@ -88,6 +98,14 @@ class _PlayerBodyState extends State<PlayerBody> {
             Chewie(controller: _chewieController!),
             if (state.status == PlaybackStatus.buffering)
               const CircularProgressIndicator(),
+            // Nằm TRÊN Chewie trong Stack — GestureDetector của overlay
+            // này nhận tap trước, Chewie (đã tắt showControls) không còn
+            // gesture riêng nào để tranh chấp nữa.
+            PlayerControlsOverlay(
+              controller: cubit.controller!,
+              isExpanded: widget.isExpanded,
+              onToggleExpand: widget.onToggleExpand,
+            ),
           ],
         );
       },

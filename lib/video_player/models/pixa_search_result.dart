@@ -1,4 +1,4 @@
-import 'pixamodel.dart';
+import 'pixa_model.dart';
 
 /// Bọc kết quả search Pixabay: cần totalHits để Bloc biết còn trang
 /// tiếp theo hay không (so sánh page * perPage với totalHits).

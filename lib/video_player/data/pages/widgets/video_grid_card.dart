@@ -46,7 +46,20 @@ class VideoGridCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(imageUrl, fit: BoxFit.cover),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      // FIX: thiếu errorBuilder -> lỗi mạng offline bị
+                      // báo ra console thay vì được Flutter xử lý êm.
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.white10,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.image_not_supported_outlined,
+                          color: Colors.white38,
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: 6,
