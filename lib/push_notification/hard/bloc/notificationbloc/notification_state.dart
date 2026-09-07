@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/notificationmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 
 sealed class NotificationState extends Equatable {
   const NotificationState();

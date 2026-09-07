@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/notificationmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 
 abstract class NotificationEvent extends Equatable {
   const NotificationEvent();
