@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
 
 sealed class FeedState extends Equatable {
   const FeedState();
