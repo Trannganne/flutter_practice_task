@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
@@ -332,37 +333,50 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title!)),
-      body: Center(
-        child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-            ? FutureBuilder<void>(
-                future: retrieveLostData(),
-                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.none:
-                    case ConnectionState.waiting:
-                      return const Text(
-                        'You have not yet picked an image.',
-                        textAlign: TextAlign.center,
-                      );
-                    case ConnectionState.done:
-                      return _handlePreview();
-                    case ConnectionState.active:
-                      if (snapshot.hasError) {
-                        return Text(
-                          'Pick image/video error: ${snapshot.error}}',
-                          textAlign: TextAlign.center,
-                        );
-                      } else {
-                        return const Text(
-                          'You have not yet picked an image.',
-                          textAlign: TextAlign.center,
-                        );
-                      }
-                  }
-                },
-              )
-            : _handlePreview(),
+      // appBar: AppBar(title: Text(widget.title!)),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Commontext(title: widget.title!),
+            pinned: true,
+            floating: true,
+            backgroundColor: Colors.amber,
+          ),
+          SliverFillRemaining(
+            child: Center(
+              child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                  ? FutureBuilder<void>(
+                      future: retrieveLostData(),
+                      builder:
+                          (BuildContext context, AsyncSnapshot<void> snapshot) {
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.none:
+                              case ConnectionState.waiting:
+                                return const Text(
+                                  'You have not yet picked an image.',
+                                  textAlign: TextAlign.center,
+                                );
+                              case ConnectionState.done:
+                                return _handlePreview();
+                              case ConnectionState.active:
+                                if (snapshot.hasError) {
+                                  return Text(
+                                    'Pick image/video error: ${snapshot.error}}',
+                                    textAlign: TextAlign.center,
+                                  );
+                                } else {
+                                  return const Text(
+                                    'You have not yet picked an image.',
+                                    textAlign: TextAlign.center,
+                                  );
+                                }
+                            }
+                          },
+                    )
+                  : _handlePreview(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
