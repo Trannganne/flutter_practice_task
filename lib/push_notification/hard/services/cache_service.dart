@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/feeditemmodel.dart';
-import '../models/notificationmodel.dart';
+import '../models/feed_item_model.dart';
+import '../models/notification_model.dart';
 
 class CacheService {
   static const String _feedKey = 'cached_feed_items';

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/router/app_routes.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/notificationmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/services/cache_service.dart';
 import 'package:flutterpractisetasks/push_notification/medium/models/articlesmodel.dart';
 //import 'package:flutterpractisetasks/router/main_router.dart';

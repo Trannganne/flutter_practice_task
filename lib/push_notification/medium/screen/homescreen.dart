@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/medium/bloc/articlebloc/article_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/medium/bloc/articlebloc/article_event.dart';
 import 'package:flutterpractisetasks/push_notification/medium/bloc/articlebloc/article_state.dart';
-import 'package:flutterpractisetasks/push_notification/medium/services/topicservice.dart';
 import 'package:flutterpractisetasks/push_notification/medium/widget/components/categorybar.dart';
 import 'package:flutterpractisetasks/push_notification/medium/widget/components/custombottomsheet.dart';
 import 'package:flutterpractisetasks/push_notification/medium/widget/components/newscard.dart';
@@ -64,6 +62,34 @@ class _NewsHomescreenState extends State<NewsHomescreen> {
           builder: (context) => Column(
             children: [
               _buildCategoryRow(context), //  truyền context vào
+              Padding(
+                padding: const EdgeInsets.only(left: 12, right: 12, top: 8),
+                child: Row(
+                  children: [
+                    Commontext(
+                      title: 'Top Stories',
+                      colorText: Colors.black,
+                      fontSize: '16',
+                      fontWeight: FontWeight.bold,
+                    ),
+                    Spacer(),
+                    Commontext(
+                      title: 'Updated just now',
+                      colorText: Colors.grey.shade500,
+                      fontSize: '10',
+                      fontWeight: FontWeight.normal,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        context.read<ArticleBloc>().add(
+                          FetchArticleEvent(category: _selectedCategory),
+                        );
+                      },
+                      icon: const Icon(Icons.sync, size: 20),
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 // ← bắt buộc có Expanded
                 child: _buildArticleList(context),
@@ -179,7 +205,7 @@ class _NewsHomescreenState extends State<NewsHomescreen> {
               FetchArticleEvent(category: _selectedCategory),
             ),
             child: ListView.builder(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.only(left: 12, right: 12),
               itemCount: articles.length,
               itemBuilder: (_, index) => Newscard(article: articles[index]),
             ),

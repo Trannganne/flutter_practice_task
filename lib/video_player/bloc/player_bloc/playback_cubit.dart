@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
 import 'playback_state.dart';
@@ -21,7 +24,7 @@ class PlaybackCubit extends Cubit<PlaybackState> {
     await _initController(_sources[_currentSourceIndex]);
   }
 
-  Future<void> _initController(String url) async {
+  Future<void> _initController(String source) async {
     // Gỡ listener + dispose controller CŨ trước khi tạo cái mới —
     // thiếu bước này là nguồn gốc bug "nhiều listener chồng nhau"
     // giống module FCM trước đây.
@@ -29,7 +32,20 @@ class PlaybackCubit extends Cubit<PlaybackState> {
 
     emit(state.copyWith(status: PlaybackStatus.loading));
 
-    final newController = VideoPlayerController.networkUrl(Uri.parse(url));
+    // phân biệt url network và url file
+    final localFile = File(source);
+    final isLocalFile = await localFile.exists();
+
+    final VideoPlayerController newController;
+
+    if (isLocalFile) {
+      debugPrint('Phát video từ local: $source');
+      newController = VideoPlayerController.file(localFile);
+    } else {
+      debugPrint('Phát video từ local: $source');
+      newController = VideoPlayerController.networkUrl(Uri.parse(source));
+    }
+
     _controller = newController;
 
     try {
@@ -43,7 +59,11 @@ class PlaybackCubit extends Cubit<PlaybackState> {
           duration: newController.value.duration,
         ),
       );
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('Không thể mở source: $source');
+      debugPrint('Source có phải file local: $isLocalFile');
+      debugPrint('Lỗi VideoPlayerController: $e');
+      debugPrintStack(stackTrace: stackTrace);
       _handlePlaybackError();
     }
   }

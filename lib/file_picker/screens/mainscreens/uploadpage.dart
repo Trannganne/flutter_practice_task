@@ -11,7 +11,7 @@ import 'package:flutterpractisetasks/widgets/common_tabbar/custom_tabbar.dart';
 import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/widgets/components/completedCard.dart';
-import 'package:flutterpractisetasks/widgets/components/filecard.dart';
+import 'package:flutterpractisetasks/widgets/components/file_card.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -128,6 +128,7 @@ class _UploadpageState extends State<Uploadpage>
                   itemBuilder: (context, index) {
                     final task = state.files[index];
                     return FileCard(
+                      taskId: task.id,
                       title: task.filePath.split('/').last,
                       status: task.status.name,
                       width: task.width ?? 0,
@@ -135,6 +136,18 @@ class _UploadpageState extends State<Uploadpage>
                       fileSize: FileSizeFormatter.format(task.sizeByte ?? 0),
                       progress: task.progress,
                       imagePath: task.filePath,
+                      onPausePressed: () {
+                        debugPrint(
+                          '[Uploadpage] Gửi PauseUploadEvent: ${task.id}',
+                        );
+                        ;
+                        context.read<FileBloc>().add(PauseUploadEvent(task.id));
+                      },
+                      onResumePressed: () {
+                        context.read<FileBloc>().add(
+                          ResumeUploadEvent(task.id),
+                        );
+                      },
                       onCancelPressed: () async {
                         final result = await CustomDialog().showCusTomDialog(
                           context,

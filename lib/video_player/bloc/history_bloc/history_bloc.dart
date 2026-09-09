@@ -27,6 +27,12 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
 
     try {
       final entries = await _historyRepo.getAll();
+      // Sắp phòng thủ theo watchedAt giảm dần — không phụ thuộc hoàn toàn
+      // vào thứ tự lưu trong SharedPreferences (đã fix ở repo, nhưng sort
+      // lại ở đây để HistoryBloc luôn tự đảm bảo đúng thứ tự hiển thị dù
+      // nguồn dữ liệu ghi có thay đổi sau này).
+      entries.sort((a, b) => b.watchedAt.compareTo(a.watchedAt));
+
       final items = <HistoryItem>[];
 
       for (final entry in entries) {

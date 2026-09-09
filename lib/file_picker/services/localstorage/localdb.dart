@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
-import 'package:flutterpractisetasks/file_picker/services/localstorage/databasehelper.dart';
+import 'package:flutterpractisetasks/file_picker/services/localstorage/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UploadLocaldb {
@@ -18,7 +18,7 @@ class UploadLocaldb {
                         INNER JOIN history h on h.task_id=t.id
                       ''');
     return maps
-        .map((m) => UploadModel.fromJson(m).copyWith(status: UploadStatus.Done))
+        .map((m) => UploadModel.fromJson(m).copyWith(status: UploadStatus.done))
         .toList();
   }
 
@@ -174,7 +174,7 @@ class UploadLocaldb {
       final rows = await db.query(
         'upload_tasks',
         where: 'status=?',
-        whereArgs: [UploadStatus.Done.name],
+        whereArgs: [UploadStatus.done.name],
         orderBy: 'updatedAt DESC',
         limit: limit,
         offset: offset,

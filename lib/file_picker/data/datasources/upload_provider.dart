@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutterpractisetasks/file_picker/models/upload_task.dart';
-import 'package:flutterpractisetasks/file_picker/models/uploadresult.dart';
+import 'package:flutterpractisetasks/file_picker/models/upload_result.dart';
 
 abstract class UploadProvider {
   ProviderType get name;

@@ -1,4 +1,8 @@
 class AppRoutes {
+  // Permissions
+  static const permission = '/permission';
+  static const permissionHome = '/permission/home';
+
   // Photos
   static const explore = '/photos/explore';
   static const allCollections = '/photos/explore/allCollections';
@@ -20,4 +24,10 @@ class AppRoutes {
   static const homeUpload = '/upload/home';
   static const media = '/upload/media';
   static const history = 'upload/history';
+
+  // Video player
+  static const homeVideo = '/player';
+  static const exploreVideo = '/player/explore';
+  static const videoHistory = '/player/history';
+  static const savedVideo = '/player/savedVideo';
 }

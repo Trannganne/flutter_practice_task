@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutterpractisetasks/push_notification/hard/services/cache_service.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/notificationmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -13,7 +13,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   switch (type) {
     case 'fcm_easy':
-      // Easy: hiện tại chưa cache gì, có thể để trống hoặc log lại
+      // Easy: hiện tại chưa cache gì nên để trống
       // nếu sau này muốn Easy cũng có "inbox" giống Hard thì thêm ở đây
       break;
 

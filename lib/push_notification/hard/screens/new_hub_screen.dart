@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/hard/bloc/feed_bloc/feed_bloc.dart';
 import 'package:flutterpractisetasks/push_notification/hard/bloc/feed_bloc/feed_event.dart';
 import 'package:flutterpractisetasks/push_notification/hard/bloc/feed_bloc/feed_state.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/components/feed_card.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/core/appcolor.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/layout/main_layout.dart';
-import 'package:flutterpractisetasks/video_player/data/pages/widgets/error_retry_banner.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
-import 'package:flutterpractisetasks/push_notification/hard/models/notificationmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
+import 'package:flutterpractisetasks/push_notification/hard/screens/components/article_banner.dart';
 
 class NewsHubScreen extends StatefulWidget {
   const NewsHubScreen({super.key});
@@ -200,6 +200,40 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
               ),
             ),
           ),
+
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_downward, color: Colors.grey, size: 12),
+                  SizedBox(width: 6),
+                  Text(
+                    'Pull to refresh',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Spacer(),
+                  Commontext(
+                    title: 'Updated just now',
+                    colorText: Colors.grey,
+                    fontSize: '12',
+                  ),
+                  SizedBox(width: 6),
+                  SizedBox(
+                    width: 8,
+                    height: 8,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(child: const SizedBox(height: 8)),
 
           SliverToBoxAdapter(child: _buildFeaturedBanner(bannerItems)),
 
@@ -392,7 +426,7 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Feedcard(
+                child: ArticleBanner(
                   item: item,
                   onTap: () => _onTapItem(context, item),
                 ),
@@ -428,100 +462,6 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
           },
         ),
       ],
-    );
-  }
-
-  // Nếu nhiều widget dùng thì sẽ thiết kế lại truyền tham số vào
-  Widget _showHeaderBottomSheet(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Commontext(title: 'Notification Center'),
-          Spacer(),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 153, 151, 151),
-            ),
-            onPressed: () {},
-            child: Commontext(
-              title: 'Clear all',
-              colorText: Colors.white,
-              fontSize: '14',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.keyboard_arrow_up, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _showRowTap(BuildContext context, int count) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Commontext(title: 'Today'),
-          Spacer(),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 153, 151, 151),
-            ),
-            onPressed: () {},
-            child: Commontext(
-              title: '$count',
-              colorText: Colors.white,
-              fontSize: '14',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNotificationBottomSheet(
-    BuildContext context,
-    FeedItem item,
-    List<NotificationItem> notifications,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _showHeaderBottomSheet(context),
-              const SizedBox(height: 16),
-              _showRowTap(context, notifications.length),
-              Text(
-                item.title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(item.description!),
-              const SizedBox(height: 16),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     Navigator.pop(context);
-              //     _onTapItem(context, item);
-              //   },
-              //   child: const Text('Xem chi tiết'),
-              // ),
-            ],
-          ),
-        );
-      },
     );
   }
 

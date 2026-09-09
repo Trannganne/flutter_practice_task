@@ -1,8 +1,8 @@
-import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
-import 'package:flutterpractisetasks/push_notification/hard/screens/newhubscreen.dart';
-import 'package:flutterpractisetasks/push_notification/hard/screens/notificationscreen.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
+import 'package:flutterpractisetasks/push_notification/hard/screens/new_hub_screen.dart';
+import 'package:flutterpractisetasks/push_notification/hard/screens/notification_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutterpractisetasks/push_notification/hard/screens/FeedItemDetailScreen.dart';
+import 'package:flutterpractisetasks/push_notification/hard/screens/Feed_Item_Detail_Screen.dart';
 
 class AppRoutes {
   static const String newHub = '/';

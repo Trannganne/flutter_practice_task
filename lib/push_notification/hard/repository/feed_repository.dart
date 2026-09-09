@@ -1,4 +1,4 @@
-import 'package:flutterpractisetasks/push_notification/hard/models/feeditemmodel.dart';
+import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/services/news_service.dart';
 import 'package:flutterpractisetasks/push_notification/medium/models/articlesmodel.dart';
 

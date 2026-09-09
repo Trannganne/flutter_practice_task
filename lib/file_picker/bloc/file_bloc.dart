@@ -26,6 +26,9 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     on<ConnectivityRestored>(_onConnectivityRestored);
     on<LoadMoreCompletedTasks>(_onLoadMoreCompletedTasks);
     on<CancelUploadEvent>(_onCancelUpload);
+    // Xử lý sự kiện pause/ resume upload
+    on<PauseUploadEvent>(_onPauseUpload);
+    on<ResumeUploadEvent>(_onResumeUpload);
 
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
@@ -34,9 +37,96 @@ class FileBloc extends Bloc<FileEvent, FileState> {
       }
     });
   }
+  Future<void> _onResumeUpload(
+    ResumeUploadEvent event,
+    Emitter<FileState> emit,
+  ) async {
+    UploadModel? currentTask;
 
-  void _onCancelUpload(CancelUploadEvent event, Emitter<FileState> emit) {
-    uploadRepository.cancelUpload(event.taskId);
+    for (final task in state.files) {
+      if (task.id == event.taskId) {
+        currentTask = task;
+        break;
+      }
+    }
+
+    if (currentTask == null) {
+      emit(state.copyWith(actionMessage: 'Không tìm thấy task upload'));
+
+      return;
+    }
+
+    if (currentTask.status != UploadStatus.paused) {
+      return;
+    }
+
+    final resumedTask = currentTask.copyWith(
+      status: UploadStatus.pending,
+
+      // Vì upload lại từ đầu nên progress phải trở về 0.
+      progress: 0,
+    );
+
+    final updatedFiles = state.files.map((task) {
+      return task.id == event.taskId ? resumedTask : task;
+    }).toList();
+
+    // Cập nhật ngay để nút Resume biến mất,
+    // tránh người dùng nhấn nhiều lần.
+    emit(state.copyWith(files: updatedFiles, status: FileStatus.success));
+
+    add(UploadTaskStarted(resumedTask));
+  }
+
+  Future<void> _onPauseUpload(
+    PauseUploadEvent event,
+    Emitter<FileState> emit,
+  ) async {
+    try {
+      debugPrint('Có tới đây không nhỉ!');
+      final wasPaused = await uploadRepository.pauseUpload(event.taskId);
+      if (!wasPaused) {
+        emit(
+          state.copyWith(
+            actionMessage: 'Task này không còn trong quá trình upload!',
+          ),
+        );
+        return;
+      }
+
+      final updatedFiles = state.files.map((task) {
+        if (task.id != event.taskId) {
+          return task;
+        }
+        return task.copyWith(
+          status: UploadStatus.paused,
+          progress: task.progress,
+        );
+      }).toList();
+
+      emit(
+        state.copyWith(
+          files: updatedFiles,
+          actionMessage: 'Tạm ngừng upload!',
+          status: FileStatus.success,
+        ),
+      );
+    } catch (e) {
+      // Bắt lỗi khi pause upload thất bại
+      debugPrint('Lỗi khi pause upload: $e');
+      emit(
+        state.copyWith(
+          actionMessage: 'Không thể pause upload. Vui lòng thử lại.',
+        ),
+      );
+    }
+  }
+
+  Future<void> _onCancelUpload(
+    CancelUploadEvent event,
+    Emitter<FileState> emit,
+  ) async {
+    await uploadRepository.cancelUpload(event.taskId);
     // Không cần emit ở đây — uploadTask() đang chạy sẽ tự bắt DioExceptionType.cancel,
     // cập nhật DB, và _onUploadTaskStarted (đang "await" nó) sẽ tự đọc lại + emit state mới
   }
@@ -148,7 +238,7 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     }).toList();
 
     // Nếu thành công, thêm bản sao vào Completed (danh sách riêng, không ảnh hưởng Queue)
-    final newCompleted = updatedTask.status == UploadStatus.Done
+    final newCompleted = updatedTask.status == UploadStatus.done
         ? [...state.completedFiles, updatedTask]
         : state.completedFiles;
 

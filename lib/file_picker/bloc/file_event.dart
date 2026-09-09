@@ -22,7 +22,21 @@ class ClearQueueEvent extends FileEvent {}
 
 class ChangeStatus extends FileEvent {}
 
-class PauseEvent extends FileEvent {}
+class PauseUploadEvent extends FileEvent {
+  final String taskId;
+  PauseUploadEvent(this.taskId);
+
+  @override
+  List<Object?> get props => [taskId];
+}
+
+class ResumeUploadEvent extends FileEvent {
+  final String taskId;
+  ResumeUploadEvent(this.taskId);
+
+  @override
+  List<Object?> get props => [taskId];
+}
 
 class RemoveFileEvent extends FileEvent {
   final String url;

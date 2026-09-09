@@ -1,4 +1,4 @@
-enum UploadStatus { failed, Done, pending, uploading, cancelled, paused }
+enum UploadStatus { failed, done, pending, uploading, cancelled, paused }
 
 enum ProviderType { imgBB, freeimage, bothFailed }
 

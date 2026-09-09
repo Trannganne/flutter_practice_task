@@ -28,130 +28,177 @@ class PhotoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: colorText,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              '${photoUrls.length} photo captured',
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-
-        SizedBox(
-          height: 100,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              for (final path in photoUrls) ...[
-                _PhotoThumnails(
-                  path: path,
-                  onRemovePressed: () => onRemovePhotoPressed(path),
+              Text(
+                title,
+                style: TextStyle(
+                  color: colorText,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 10),
-              ],
-              SizedBox(width: 8),
-              Expanded(
-                flex: 4,
-                child: InkWell(
-                  onTap: onTakePhotoPressed,
-                  borderRadius: BorderRadius.circular(12),
-                  child: DashedContainer(
-                    color: colorText,
-                    radius: 12,
-                    child: Container(
-                      height: 100,
-                      alignment: Alignment.center,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(icon, color: Colors.grey),
-                          SizedBox(height: 4),
-                          Text(
-                            content,
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
-                          ),
-                        ],
+              ),
+              Text(
+                '${photoUrls.length} photo captured',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // SizedBox(
+          //   height: 100,
+          //   child: ListView(
+          //     scrollDirection: Axis.horizontal,
+          //     children: [
+          //       for (final path in photoUrls) ...[
+          //         _PhotoThumnails(
+          //           path: path,
+          //           onRemovePressed: () => onRemovePhotoPressed(path),
+          //         ),
+          //         const SizedBox(width: 10),
+          //       ],
+          //       SizedBox(width: 8),
+          //       Expanded(
+          //         flex: 4,
+          //         child: InkWell(
+          //           onTap: onTakePhotoPressed,
+          //           borderRadius: BorderRadius.circular(12),
+          //           child: DashedContainer(
+          //             color: colorText,
+          //             radius: 12,
+          //             child: Container(
+          //               height: 100,
+          //               alignment: Alignment.center,
+          //               child: Column(
+          //                 mainAxisAlignment: MainAxisAlignment.center,
+          //                 children: [
+          //                   Icon(icon, color: Colors.grey),
+          //                   SizedBox(height: 4),
+          //                   Text(
+          //                     content,
+          //                     style: TextStyle(color: Colors.grey, fontSize: 12),
+          //                   ),
+          //                 ],
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          SizedBox(
+            height: 100,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                for (final path in photoUrls) ...[
+                  _PhotoThumnails(
+                    path: path,
+                    onRemovePressed: () => onRemovePhotoPressed(path),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                SizedBox(
+                  width: 100, // sửa: thay Expanded bằng width cố định
+                  child: InkWell(
+                    onTap: onTakePhotoPressed,
+                    borderRadius: BorderRadius.circular(12),
+                    child: DashedContainer(
+                      color: colorText,
+                      radius: 12,
+                      child: Container(
+                        height: 100,
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(icon, color: Colors.grey),
+                            const SizedBox(height: 4),
+                            Text(
+                              content,
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        // Row(
-        //   children: [
+          // Row(
+          //   children: [
 
-        //    // Preview Image từ API
-        //     Expanded(
-        //       flex: 6,
-        //       child: ClipRRect(
-        //         borderRadius: BorderRadius.circular(12),
-        //         child: photoUrls
-        //             ? Image.file(
-        //                 File(photoUrls!),
-        //                 height: 100,
-        //                 fit: BoxFit.cover,
-        //                 errorBuilder: (context, error, stackTrace) => Container(
-        //                   height: 100,
-        //                   color: const Color(0xFF111827),
-        //                   child: const Icon(
-        //                     Icons.broken_image,
-        //                     color: Colors.white24,
-        //                   ),
-        //                 ),
-        //               )
-        //             : Container(
-        //                 height: 100,
-        //                 color: const Color(0xFF111827),
-        //                 child: const Icon(Icons.image, color: Colors.white24),
-        //               ),
-        //       ),
-        //     ),
-        //     const SizedBox(width: 12),
-        //     // Nút Take Photo dạng nét đứt
-        //     Expanded(
-        //       flex: 4,
-        //       child: InkWell(
-        //         onTap: onTakePhotoPressed,
-        //         borderRadius: BorderRadius.circular(12),
-        //         child: DashedContainer(
-        //           color: Colors.white,
-        //           radius: 12,
-        //           child: Container(
-        //             height: 100,
-        //             alignment: Alignment.center,
-        //             child: const Column(
-        //               mainAxisAlignment: MainAxisAlignment.center,
-        //               children: [
-        //                 Icon(Icons.camera_alt, color: Colors.white),
-        //                 SizedBox(height: 4),
-        //                 Text(
-        //                   'Take Photo',
-        //                   style: TextStyle(color: Colors.white, fontSize: 12),
-        //                 ),
-        //               ],
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
-      ],
+          //    // Preview Image từ API
+          //     Expanded(
+          //       flex: 6,
+          //       child: ClipRRect(
+          //         borderRadius: BorderRadius.circular(12),
+          //         child: photoUrls
+          //             ? Image.file(
+          //                 File(photoUrls!),
+          //                 height: 100,
+          //                 fit: BoxFit.cover,
+          //                 errorBuilder: (context, error, stackTrace) => Container(
+          //                   height: 100,
+          //                   color: const Color(0xFF111827),
+          //                   child: const Icon(
+          //                     Icons.broken_image,
+          //                     color: Colors.white24,
+          //                   ),
+          //                 ),
+          //               )
+          //             : Container(
+          //                 height: 100,
+          //                 color: const Color(0xFF111827),
+          //                 child: const Icon(Icons.image, color: Colors.white24),
+          //               ),
+          //       ),
+          //     ),
+          //     const SizedBox(width: 12),
+          //     // Nút Take Photo dạng nét đứt
+          //     Expanded(
+          //       flex: 4,
+          //       child: InkWell(
+          //         onTap: onTakePhotoPressed,
+          //         borderRadius: BorderRadius.circular(12),
+          //         child: DashedContainer(
+          //           color: Colors.white,
+          //           radius: 12,
+          //           child: Container(
+          //             height: 100,
+          //             alignment: Alignment.center,
+          //             child: const Column(
+          //               mainAxisAlignment: MainAxisAlignment.center,
+          //               children: [
+          //                 Icon(Icons.camera_alt, color: Colors.white),
+          //                 SizedBox(height: 4),
+          //                 Text(
+          //                   'Take Photo',
+          //                   style: TextStyle(color: Colors.white, fontSize: 12),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+        ],
+      ),
     );
   }
 }
