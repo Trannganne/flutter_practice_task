@@ -28,7 +28,10 @@ class CustomTabBar extends StatelessWidget {
         unselectedLabelColor: Colors.grey,
         indicatorColor: Colors.blue,
         tabs: List.generate(labels.length, (index) {
-          return Tab(icon: Icon(icons?[index]), text: labels[index]);
+          return Tab(
+            icon: icons != null ? Icon(icons?[index]) : null,
+            text: labels[index],
+          );
         }),
       ),
     );
