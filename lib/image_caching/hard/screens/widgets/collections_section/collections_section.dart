@@ -1,5 +1,4 @@
 // lib/presentation/widgets/collection_section.dart
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutterpractisetasks/image_caching/hard/screens/widgets/card/photo_card.dart';
