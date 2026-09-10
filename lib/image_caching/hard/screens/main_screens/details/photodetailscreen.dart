@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_bloc.dart';
+import 'package:flutterpractisetasks/image_caching/hard/bloc/photo_event.dart';
 import 'package:flutterpractisetasks/image_caching/models/photo_model.dart';
 
 class PhotoDetailScreen extends StatefulWidget {
@@ -47,7 +50,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       widget.photo.isFavorited = _isFavorited;
     });
 
-    // TODO: Bắn event lên PhotoBloc hoặc lưu vào database nếu có
+    // TODO: Bắn event lên PhotoBloc
+
+    context.read<PhotoBloc>().add(ToggleFavoritesEvent(widget.photo));
   }
 
   @override
@@ -205,7 +210,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(30),
-                          onTap: _toggleFavorite,
+                          onTap: () {
+                            _toggleFavorite();
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
