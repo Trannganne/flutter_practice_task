@@ -1,4 +1,6 @@
 // lib/presentation/widgets/collection_section.dart
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutterpractisetasks/image_caching/hard/screens/widgets/card/photo_card.dart';
 import 'package:flutterpractisetasks/image_caching/models/pexel_collection.dart';
@@ -9,7 +11,7 @@ class CollectionSection extends StatelessWidget {
   final String title;
   final List<PexelCollections> collections;
   final VoidCallback? onSeeAllPressed;
-  final VoidCallback? onCollectionTap;
+  final ValueChanged<PexelCollections>? onCollectionTap;
 
   const CollectionSection({
     Key? key,
@@ -93,9 +95,8 @@ class CollectionSection extends StatelessWidget {
                 child: PhotoCard(
                   collections: collection,
                   onTap: () {
-                    onCollectionTap;
+                    onCollectionTap?.call(collection);
                     // Xử lý khi nhấn vào card (ví dụ: chuyển trang)
-                    print('Pressed ${collection.title}');
                   },
                 ),
               );
