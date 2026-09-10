@@ -69,13 +69,15 @@ class _ExplorepageState extends State<Explorepage> {
                   child: CollectionSection(
                     collections: state.collections,
                     onSeeAllPressed: () => context.go(AppRoutes.allCollections),
-                    // Kiểm tra lại phần void callback sẽ gọi gì
 
-                    // onCollectionTap: (index) {
-                    //   setState(() {
-                    //     _selectedCollectionIndex = index;
-                    //   });
-                    // },
+                    // Kiểm tra lại phần void callback sẽ gọi gì
+                    onCollectionTap: (collection) {
+                      context.pushNamed(
+                        AppRoutes.collectionDetails,
+                        pathParameters: {'collectionId': collection.id},
+                        extra: {'collectionTitle': collection.title},
+                      );
+                    },
                   ),
                 ),
                 // Truyền đúng danh sách photos vào PhotosSection
