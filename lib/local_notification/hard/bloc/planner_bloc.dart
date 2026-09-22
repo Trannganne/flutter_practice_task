@@ -321,7 +321,7 @@ Have a nice day!       ''';
       final body = _buildNotification(activity, forecast, result);
       local_planner_notifi.NotificationService.schedulePlanner(
         body,
-        hour: 13,
+        hour: 14,
         minute: 53,
       );
       await PlannerHistoryCacheservice.savePlannerHistory(
@@ -336,8 +336,8 @@ Have a nice day!       ''';
       if (!isAct && isForecast) {
         local_weather_notifi.NotificationService.scheduleUmbrella(
           forecast.maxRainProbabilityNext12h,
-          hour: 13,
-          minute: 53,
+          hour: 14,
+          minute: 35,
         );
         await PlannerHistoryCacheservice.savePlannerHistory(
           NotificationHistory(

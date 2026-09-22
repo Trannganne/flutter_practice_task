@@ -51,8 +51,8 @@ class NotificationService {
 
   static Future<void> scheduleUmbrella(
     double pop, {
-    int hour = 17,
-    int minute = 30,
+    int hour = 14,
+    int minute = 35,
   }) async {
     await _notification.cancel(id: _scheduleId);
 
