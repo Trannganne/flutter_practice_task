@@ -6,6 +6,7 @@ import 'package:flutterpractisetasks/local_notification/medium/service/weather_a
 import 'package:shared_preferences/shared_preferences.dart';
 import 'forecast_event.dart';
 import 'forecast_state.dart';
+import 'package:dio/dio.dart';
 
 class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
   WeatherBloc() : super(WeatherInitial()) {
@@ -40,7 +41,6 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
         position.latitude,
         position.longitude,
       );
-      print('Tới đây rồi nè');
       print('Lat nè: ${position.latitude}');
       print('Long nè: ${position.longitude}');
 
@@ -48,7 +48,6 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
       final prefs = await SharedPreferences.getInstance();
       final threshold = prefs.getDouble('rain_threshold') ?? 0.5;
       final isScheduled = prefs.getBool('umbrella_scheduled') ?? false;
-      print('Tới đây rồi nè 2');
       final hasRain = RainDetector.hasRainComingSoon(
         forecast,
         threshold: threshold,
@@ -80,6 +79,20 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
           rainPercentage: rainPct,
           isScheduled: true,
           rainThreshold: threshold,
+        ),
+      );
+        } on DioException catch (e) {
+      final isConnectionError =
+          e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout;
+
+      emit(
+        WeatherLoadFailure(
+          message: isConnectionError
+              ? 'Vui lòng kiểm tra kết nối mạng'
+              : 'Không thể tải dự báo thời tiết. Vui lòng thử lại.',
         ),
       );
     } catch (e) {
