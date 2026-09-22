@@ -28,22 +28,37 @@ class Weather {
   Map<String, dynamic> toJson() {
     return {
       'cityName': cityName,
-      'dt': dateTime.toIso8601String(),
-      'main': {'temp': temp, 'feels_like': feelsLike, 'humidity': humidity},
+      // Ghi Unix timestamp (seconds) — giữ đúng contract với OpenWeatherMap API
+      'dt': dateTime.millisecondsSinceEpoch ~/ 1000,
+      'main': {'temp': temp, 'feels_like': feelsLike, 'humidity': humidity, 'pressure': pressure},
       'weather': [
         {'main': weatherMain, 'description': description, 'icon': icon},
       ],
       'wind': {'speed': windSpeed},
       'pop': rainProbability,
-      'pressure': pressure,
     };
+  }
+
+  /// Parse trường dt: chấp nhận int (Unix seconds từ API) hoặc
+  /// String ISO-8601 (cache cũ đã lưu trước khi sửa).
+  static DateTime _parseDt(dynamic dt) {
+    if (dt is int) {
+      return DateTime.fromMillisecondsSinceEpoch(dt * 1000);
+    }
+    if (dt is String) {
+      return DateTime.parse(dt); // ISO-8601
+    }
+    throw FormatException(
+      'Weather.fromJson: dt phải là int hoặc String ISO-8601, '
+      'nhận được ${dt.runtimeType}: $dt',
+    );
   }
 
   factory Weather.fromJson(Map<String, dynamic> json) {
     return Weather(
       cityName: json['name'],
-      // dt là Unix timestamp (seconds) → convert sang DateTime
-      dateTime: DateTime.fromMillisecondsSinceEpoch((json['dt'] as int) * 1000),
+      // Hỗ trợ cả Unix timestamp (API) và ISO-8601 string (cache cũ)
+      dateTime: _parseDt(json['dt']),
       temp: (json['main']['temp'] as num).toDouble(),
       weatherMain: json['weather'][0]['main'] as String,
       description: json['weather'][0]['description'] as String,
