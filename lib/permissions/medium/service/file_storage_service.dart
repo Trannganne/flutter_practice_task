@@ -37,6 +37,8 @@
 // }
 
 import 'dart:io';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -45,7 +47,6 @@ import 'package:share_plus/share_plus.dart';
 class FileStorageService {
   Future<bool> _requestStoragePermission() async {
     if (Platform.isAndroid) {
-      // Android 11+ cần MANAGE_EXTERNAL_STORAGE
       if (await Permission.manageExternalStorage.isGranted) {
         return true;
       }
@@ -55,14 +56,11 @@ class FileStorageService {
     return true; // iOS xử lý riêng
   }
 
-  Future<String> exportCountriesToCsv(
-    String csvContent,
-    String fileName,
-  ) async {
+  Future<String> exportCountriesToCsv(String csvContent) async {
     if (Platform.isAndroid) {
       final granted = await _requestStoragePermission();
       if (!granted) {
-        throw Exception('Không có quyền truy cập storage');
+        throw Exception('Không có quyền truy cập bộ nhớ');
       }
 
       final Directory reportDir = Directory(
@@ -73,13 +71,30 @@ class FileStorageService {
         await reportDir.create(recursive: true);
       }
 
-      final String path = '${reportDir.path}/$fileName.csv';
+      final bytes = utf8.encode(csvContent);
+      final hash = md5.convert(bytes).toString();
+      final String fileName = 'export_$hash.csv';
+      final String path = '${reportDir.path}/$fileName';
       final File file = File(path);
-      await file.writeAsString(csvContent);
 
+      if (await file.exists()) {
+        final existingContent = await file.readAsString();
+        if (existingContent == csvContent) {
+          return path; // Return existing path if identical
+        } else {
+          // Hash collision or file modified, generate new timestamped name
+          final fallbackFileName =
+              'export_${hash}_${DateTime.now().millisecondsSinceEpoch}.csv';
+          final String fallbackPath = '${reportDir.path}/$fallbackFileName';
+          final fallbackFile = File(fallbackPath);
+          await fallbackFile.writeAsString(csvContent);
+          return fallbackPath;
+        }
+      }
+
+      await file.writeAsString(csvContent);
       return file.path;
     } else {
-      // iOS: không thể ghi thẳng vào Download, lưu app sandbox rồi share
       throw UnsupportedError(
         'iOS không hỗ trợ ghi trực tiếp vào Download. Dùng share_plus để xuất file.',
       );
@@ -91,7 +106,10 @@ class FileStorageService {
   }
 
   Future<void> shareFile(String path) async {
-    // Gọi share_plus để share/ open file
+    final file = File(path);
+    if (!await file.exists()) {
+      throw Exception('File không tồn tại hoặc đã bị xóa.');
+    }
     final xFile = XFile(path, mimeType: 'text/csv');
 
     await Share.shareXFiles([

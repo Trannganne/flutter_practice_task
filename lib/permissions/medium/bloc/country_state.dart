@@ -27,16 +27,19 @@ class CountryLoadSuccess extends CountryState {
   final bool isPermissionGranted;
   final bool? isSuccess;
   final String? exportPath;
+  final bool isExporting;
+  final bool isExportingAll;
 
   CountryLoadSuccess({
     required this.allCountries,
     required this.countries,
-
     this.actionMessage,
     this.isPermissionGranted = false,
     this.isSuccess,
     this.exportPath,
     this.filter = const CountryFilter(),
+    this.isExporting = false,
+    this.isExportingAll = false,
   });
 
   CountryLoadSuccess copyWith({
@@ -47,6 +50,8 @@ class CountryLoadSuccess extends CountryState {
     bool? isSuccess,
     String? exportPath,
     CountryFilter? filter,
+    bool? isExporting,
+    bool? isExportingAll,
   }) {
     return CountryLoadSuccess(
       allCountries: allCountries ?? this.allCountries,
@@ -58,6 +63,8 @@ class CountryLoadSuccess extends CountryState {
       isSuccess: isSuccess ?? this.isSuccess,
       exportPath: exportPath ?? this.exportPath,
       filter: filter ?? this.filter,
+      isExporting: isExporting ?? this.isExporting,
+      isExportingAll: isExportingAll ?? this.isExportingAll,
     );
   }
 
@@ -70,6 +77,8 @@ class CountryLoadSuccess extends CountryState {
     isPermissionGranted,
     isSuccess,
     exportPath,
+    isExporting,
+    isExportingAll,
   ];
 }
 

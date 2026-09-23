@@ -12,9 +12,10 @@ import 'package:permission_handler/permission_handler.dart';
 class CountryBloc extends Bloc<CountryEvent, CountryState> {
   CountryBloc() : super(CountryInitial()) {
     on<FetchCountryEvent>(_onFetchCountries);
+    on<RefreshCountryEvent>(_onRefreshCountries);
     on<ExportCsvEvent>(_onExportCsv);
     on<RequestStoragePermissionEvent>(_onRequestStoragePermission);
-    on<OpenExportedFileEvent>(_onOpenExportedFile);
+    on<ShareExportedFileEvent>(_onShareExportedFile);
     on<ApplyFilterEvent>(_onApplyFilter);
   }
 
@@ -25,7 +26,6 @@ class CountryBloc extends Bloc<CountryEvent, CountryState> {
     emit(CountryLoading());
     try {
       final countries = await CountryRepository.getCountry();
-      print('Cờ nè: ${countries[1].flagUrl}');
       emit(
         CountryLoadSuccess(
           allCountries: countries,
@@ -34,7 +34,54 @@ class CountryBloc extends Bloc<CountryEvent, CountryState> {
         ),
       );
     } catch (e) {
-      emit(CountryLoadFailure(message: 'Tải countries thất bại: $e'));
+      emit(
+        CountryLoadFailure(
+          message: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onRefreshCountries(
+    RefreshCountryEvent event,
+    Emitter<CountryState> emit,
+  ) async {
+    if (state is! CountryLoadSuccess) {
+      add(FetchCountryEvent());
+      return;
+    }
+    final current = state as CountryLoadSuccess;
+    try {
+      final countries = await CountryRepository.getCountry();
+      // Re-apply filter
+      final f = current.filter;
+      final filtered = countries.where((c) {
+        final matchKeyword =
+            f.keyword.isEmpty ||
+            c.name.toLowerCase().contains(f.keyword.toLowerCase());
+        final matchMin =
+            f.minPopulation == null || c.population >= f.minPopulation!;
+        final matchMax =
+            f.maxPopulation == null || c.population <= f.maxPopulation!;
+        final matchSide =
+            f.drivingSide == null || c.driving_side == f.drivingSide;
+        return matchKeyword && matchMin && matchMax && matchSide;
+      }).toList();
+
+      emit(
+        CountryLoadSuccess(
+          allCountries: countries,
+          countries: filtered,
+          filter: f,
+          actionMessage: "Tải lại danh sách thành công!",
+        ),
+      );
+    } catch (e) {
+      emit(
+        current.copyWith(
+          actionMessage: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
     }
   }
 
@@ -44,20 +91,32 @@ class CountryBloc extends Bloc<CountryEvent, CountryState> {
   ) async {
     if (state is! CountryLoadSuccess) return;
     final current = state as CountryLoadSuccess;
-    try {
-      // Chuyển list Country sang string csv
-      final csvString = await CsvService().toCsvRows(current.countries);
 
-      // Xuất file
-      // Trả về đường dẫn
+    if (current.isExporting) return; // Prevent concurrent exports
+
+    final exportList = event.exportAll
+        ? current.allCountries
+        : current.countries;
+    if (exportList.isEmpty) {
+      emit(current.copyWith(actionMessage: 'Không có dữ liệu để xuất!'));
+      return;
+    }
+
+    emit(current.copyWith(isExporting: true, isExportingAll: event.exportAll));
+
+    try {
+      final csvString = CsvService().toCsvRows(exportList);
       final String result = await FileStorageService().exportCountriesToCsv(
         csvString,
-        'countries',
       );
+
+      // We don't have a reliable way to check if it was reused from the result path alone,
+      // but FileStorageService returns the same path if the file exists and is identical.
+      // We can just say it was exported.
 
       emit(
         current.copyWith(
-          countries: current.countries,
+          isExporting: false,
           actionMessage: 'Xuất file thành công!',
           isSuccess: true,
           exportPath: result,
@@ -66,12 +125,12 @@ class CountryBloc extends Bloc<CountryEvent, CountryState> {
     } catch (e) {
       emit(
         current.copyWith(
-          countries: current.countries,
-          actionMessage: 'Xuất file csv thất bại!',
+          isExporting: false,
+          actionMessage: e.toString().replaceFirst('Exception: ', ''),
           isSuccess: false,
         ),
       );
-      debugPrint('Lỗi: $e');
+      debugPrint('Lỗi xuất file: $e');
     }
   }
 
@@ -114,37 +173,26 @@ class CountryBloc extends Bloc<CountryEvent, CountryState> {
         }
       }
     } catch (e) {
-      emit(
-        current.copyWith(
-          countries: current.countries,
-          actionMessage: 'Lỗi xử lý quyền: $e',
-        ),
-      );
+      emit(current.copyWith(actionMessage: 'Lỗi xử lý quyền: $e'));
     }
   }
 
-  Future<void> _onOpenExportedFile(
-    OpenExportedFileEvent event,
+  Future<void> _onShareExportedFile(
+    ShareExportedFileEvent event,
     Emitter<CountryState> emit,
   ) async {
     if (state is! CountryLoadSuccess) return;
     final current = state as CountryLoadSuccess;
 
     try {
-      final result = await FileStorageService().openFile(event.filePath);
-
-      if (result.type != ResultType.done) {
-        emit(
-          current.copyWith(
-            countries: current.countries,
-            actionMessage: 'Mở file thất bại! Vui lòng kiểm tra lại đường dẫn.',
-            exportPath: current.exportPath,
-          ),
-        );
-      }
+      await FileStorageService().shareFile(event.filePath);
     } catch (e) {
-      debugPrint('Lỗi mở file: $e');
-      ;
+      debugPrint('Lỗi chia sẻ file: $e');
+      emit(
+        current.copyWith(
+          actionMessage: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
     }
   }
 
