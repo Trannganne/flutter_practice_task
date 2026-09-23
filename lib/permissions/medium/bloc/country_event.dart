@@ -13,13 +13,18 @@ class CountryStarted extends CountryEvent {}
 
 class FetchCountryEvent extends CountryEvent {}
 
-class ExportCsvEvent extends CountryEvent {}
+class RefreshCountryEvent extends CountryEvent {}
+
+class ExportCsvEvent extends CountryEvent {
+  final bool exportAll;
+  ExportCsvEvent({required this.exportAll});
+}
 
 class RequestStoragePermissionEvent extends CountryEvent {}
 
-class OpenExportedFileEvent extends CountryEvent {
+class ShareExportedFileEvent extends CountryEvent {
   final String filePath;
-  OpenExportedFileEvent(this.filePath);
+  ShareExportedFileEvent(this.filePath);
 }
 
 class ApplyFilterEvent extends CountryEvent {

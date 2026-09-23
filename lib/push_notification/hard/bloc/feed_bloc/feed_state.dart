@@ -13,15 +13,17 @@ class FeedLoading extends FeedState {}
 
 class FeedLoaded extends FeedState {
   final List<FeedItem> items;
-  final bool hasMore; // còn trang tiếp không
-  final bool isOffline; // đang dùng cache
+  final bool hasMore;
+  final bool isOffline;
   final int currentPage;
+  final bool hasLoadMoreError; // Thêm cờ để biết load more bị lỗi
 
-  FeedLoaded({
+  const FeedLoaded({
     required this.items,
     this.hasMore = true,
     this.isOffline = false,
     this.currentPage = 1,
+    this.hasLoadMoreError = false,
   });
 
   FeedLoaded copyWith({
@@ -29,22 +31,38 @@ class FeedLoaded extends FeedState {
     bool? hasMore,
     bool? isOffline,
     int? currentPage,
+    bool? hasLoadMoreError,
   }) {
     return FeedLoaded(
       items: items ?? this.items,
       hasMore: hasMore ?? this.hasMore,
       isOffline: isOffline ?? this.isOffline,
       currentPage: currentPage ?? this.currentPage,
+      hasLoadMoreError: hasLoadMoreError ?? this.hasLoadMoreError,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    items,
+    hasMore,
+    isOffline,
+    currentPage,
+    hasLoadMoreError,
+  ];
 }
 
 class FeedLoadingMore extends FeedLoaded {
-  FeedLoadingMore({required super.items, super.currentPage});
+  const FeedLoadingMore({required super.items, super.currentPage})
+    : super(hasLoadMoreError: false);
 }
 
 class FeedError extends FeedState {
   final String message;
-  final List<FeedItem> cachedItems; // vẫn hiện cache khi lỗi
-  FeedError({required this.message, this.cachedItems = const []});
+  final List<FeedItem> cachedItems;
+  final bool isOfflineError;
+  const FeedError({required this.message, this.cachedItems = const [], this.isOfflineError = false});
+
+  @override
+  List<Object?> get props => [message, cachedItems, isOfflineError];
 }

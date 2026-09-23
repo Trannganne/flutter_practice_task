@@ -11,6 +11,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/components/article_banner.dart';
+import 'package:flutterpractisetasks/push_notification/hard/services/notification_service.dart'
+    as noti_service;
 
 class NewsHubScreen extends StatefulWidget {
   const NewsHubScreen({super.key});
@@ -28,6 +30,9 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
   void initState() {
     super.initState();
     _bannerPageController = PageController(viewportFraction: 1.0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      noti_service.NotificationService.consumePendingNavigation();
+    });
   }
 
   @override
@@ -83,13 +88,14 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
 
               FeedLoading() => const Center(child: CircularProgressIndicator()),
 
-              FeedError(:final message, :final cachedItems) =>
+              FeedError(:final message, :final cachedItems, :final isOfflineError) =>
                 cachedItems.isNotEmpty
                     ? _buildList(
                         context,
                         cachedItems,
                         hasMore: false,
-                        isOffline: true,
+                        isOffline: isOfflineError,
+                        isErrorFallback: !isOfflineError,
                       )
                     : Center(child: Text(message)),
 
@@ -99,6 +105,7 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
                 hasMore: state.hasMore,
                 isOffline: state.isOffline,
                 isLoadingMore: state is FeedLoadingMore,
+                hasLoadMoreError: state.hasLoadMoreError,
               ),
             };
           },
@@ -164,13 +171,15 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
     required bool hasMore,
     required bool isOffline,
     bool isLoadingMore = false,
+    bool hasLoadMoreError = false,
+    bool isErrorFallback = false,
   }) {
     final bannerItems = items
         .where((item) => item.type == "article")
         .take(_bannerCount)
         .toList();
 
-    // Không hiển thị lại 6 bài đã nằm trong banner
+    // Không hiển thị lại bài đã nằm trong banner
     final remainingItems = items.skip(bannerItems.length).toList();
 
     return RefreshIndicator(
@@ -179,11 +188,11 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
       },
       child: CustomScrollView(
         slivers: [
-          if (isOffline)
+          if (isOffline || isErrorFallback)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                child: _buildOfflineBanner(),
+                child: _buildOfflineBanner(isErrorFallback: isErrorFallback),
               ),
             ),
 
@@ -266,11 +275,12 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
             ),
           ),
 
-          if (hasMore || isLoadingMore)
+          if (hasMore || isLoadingMore || hasLoadMoreError)
             SliverToBoxAdapter(
               child: _buildLoadMoreSection(
                 context,
                 isLoadingMore: isLoadingMore,
+                hasLoadMoreError: hasLoadMoreError,
               ),
             ),
 
@@ -284,12 +294,32 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
   Widget _buildLoadMoreSection(
     BuildContext context, {
     required bool isLoadingMore,
+    required bool hasLoadMoreError,
   }) {
     if (isLoadingMore) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (hasLoadMoreError) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+        child: OutlinedButton.icon(
+          onPressed: () {
+            context.read<FeedBloc>().add(LoadMoreFeedEvent());
+          },
+          icon: const Icon(Icons.refresh, color: Colors.red),
+          label: const Text(
+            'Lỗi tải thêm, thử lại',
+            style: TextStyle(color: Colors.red),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.red),
+          ),
         ),
       );
     }
@@ -465,21 +495,21 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
     );
   }
 
-  Widget _buildOfflineBanner() {
+  Widget _buildOfflineBanner({bool isErrorFallback = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: isErrorFallback ? Colors.red.shade50 : Colors.orange.shade50,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(Icons.wifi_off, size: 14, color: Colors.orange.shade700),
+          Icon(isErrorFallback ? Icons.error_outline : Icons.wifi_off, size: 14, color: isErrorFallback ? Colors.red.shade700 : Colors.orange.shade700),
           const SizedBox(width: 6),
           Text(
-            'Offline — đang hiện dữ liệu đã lưu',
-            style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
+            isErrorFallback ? 'Lỗi máy chủ — đang hiện dữ liệu đã lưu' : 'Offline — đang hiện dữ liệu đã lưu',
+            style: TextStyle(fontSize: 11, color: isErrorFallback ? Colors.red.shade700 : Colors.orange.shade700),
           ),
         ],
       ),

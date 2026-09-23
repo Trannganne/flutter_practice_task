@@ -19,9 +19,7 @@ class CountryApi {
       print(response.data);
       return response.data;
     } on DioException catch (e) {
-      print("URI: ${e.requestOptions.uri}");
-      print("Status: ${e.response?.statusCode}");
-      print("Body: ${e.response?.data}");
+      _handleDioException(e);
       rethrow;
     }
   }
@@ -35,10 +33,24 @@ class CountryApi {
       print(response.data);
       return response.data;
     } on DioException catch (e) {
-      print("URI: ${e.requestOptions.uri}");
-      print("Status: ${e.response?.statusCode}");
-      print("Body: ${e.response?.data}");
+      _handleDioException(e);
       rethrow;
+    }
+  }
+
+  static void _handleDioException(DioException e) {
+    print("URI: ${e.requestOptions.uri}");
+    print("Status: ${e.response?.statusCode}");
+    print("Body: ${e.response?.data}");
+
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      throw Exception('Kết nối quá chậm. Vui lòng thử lại');
+    } else if (e.type == DioExceptionType.connectionError) {
+      throw Exception('Mất kết nối mạng. Vui lòng thử lại');
+    } else {
+      throw Exception('Không thể tải danh sách quốc gia. Vui lòng thử lại');
     }
   }
 }

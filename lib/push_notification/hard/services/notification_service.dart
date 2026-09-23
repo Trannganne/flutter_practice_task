@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
@@ -36,6 +37,7 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
   static bool _isInitialized = false;
+  static Map<String, dynamic>? pendingNavigationPayload;
 
   static Future<void> initialize() async {
     if (_isInitialized) return;
@@ -95,17 +97,57 @@ class NotificationService {
   static void _setupMessageHandlers() {
     // Foreground — app đang mở
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      if (message.data['type'] != 'fcm_hard') return;
       print('Foreground: ${message.notification?.title}');
 
       // 1. Lưu vào NotificationItem cache — bài Hard yêu cầu
       await _saveNotificationToCache(message);
 
-      // 2. Hiện local notification trên màn hình
-      await _showLocalNotification(message);
+      // 2. Hiện in-app banner
+      final context = AppRoutes.navigatorKey.currentContext;
+      if (context != null) {
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
+            content: Text(
+              '${message.notification?.title ?? 'Bảng tin mới'}\n${message.notification?.body ?? ''}',
+            ),
+            leading: const Icon(Icons.notifications_active),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                },
+                child: const Text('ĐÓNG'),
+              ),
+              TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                  _navigateFromPayload({
+                    'url': message.data['url'],
+                    'title': message.notification?.title,
+                    'sourceName': message.data['sourceName'],
+                    'urlToImage': message.data['urlToImage'],
+                  });
+                },
+                child: const Text('XEM'),
+              ),
+            ],
+          ),
+        );
+        // Tự động ẩn banner sau 4 giây
+        Future.delayed(const Duration(seconds: 4), () {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+          }
+        });
+      } else {
+        await _showLocalNotification(message);
+      }
     });
 
     // Background — user tap notification
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (message.data['type'] != 'fcm_hard') return;
       print('Tap: ${message.notification?.title}');
       final url = message.data['url'] ?? '';
       if (url.isNotEmpty) {
@@ -123,16 +165,13 @@ class NotificationService {
   static Future<void> _handleInitialMessage() async {
     final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage == null) return;
+    if (initialMessage.data['type'] != 'fcm_hard') return;
     print('Initial message: ${initialMessage.notification?.title}');
 
     final url = initialMessage.data['url'] ?? '';
     if (url.isNotEmpty) {
-      _navigateToDetail(
-        url: url,
-        title: initialMessage.notification?.title,
-        sourceName: initialMessage.data['sourceName'],
-        urlToImage: initialMessage.data['urlToImage'],
-      );
+      pendingNavigationPayload = initialMessage.data;
+      pendingNavigationPayload!['title'] = initialMessage.notification?.title;
     }
   }
 
@@ -173,6 +212,14 @@ class NotificationService {
       sourceName: data['sourceName'],
       urlToImage: data['urlToImage'],
     );
+  }
+
+  static void consumePendingNavigation() {
+    if (pendingNavigationPayload != null) {
+      final data = pendingNavigationPayload!;
+      pendingNavigationPayload = null;
+      _navigateFromPayload(data);
+    }
   }
 
   // Điều hướng sang ArticleDetailScreen

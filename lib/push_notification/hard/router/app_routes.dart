@@ -3,6 +3,7 @@ import 'package:flutterpractisetasks/push_notification/hard/screens/new_hub_scre
 import 'package:flutterpractisetasks/push_notification/hard/screens/notification_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/Feed_Item_Detail_Screen.dart';
+import 'package:flutter/material.dart';
 
 class AppRoutes {
   static const String newHub = '/';
@@ -10,6 +11,9 @@ class AppRoutes {
 
   // Router hiện đang active — cập nhật mỗi khi ModuleHost mở module này
   static GoRouter? _activeRouter;
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   static GoRouter get router {
     if (_activeRouter == null) {
       throw StateError('Router chưa được khởi tạo. Gọi createRouter() trước.');
@@ -19,6 +23,7 @@ class AppRoutes {
 
   static GoRouter createRouter() {
     _activeRouter = GoRouter(
+      navigatorKey: navigatorKey,
       initialLocation: newHub,
       routes: [
         GoRoute(

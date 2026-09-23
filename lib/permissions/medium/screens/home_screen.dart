@@ -66,28 +66,52 @@ class _CountryViewState extends State<_CountryView> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
-              child: ElevatedButton.icon(
-                // Gửi EVENT -> gọi Bloc từ UI
-                onPressed: () =>
-                    context.read<CountryBloc>().add(ExportCsvEvent()),
-                icon: const Icon(Icons.download, size: 18, color: Colors.white),
-                label: const Text(
-                  'Export CSV',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D6EFD),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
+              child: BlocBuilder<CountryBloc, CountryState>(
+                builder: (context, state) {
+                  final isExporting = state is CountryLoadSuccess
+                      ? state.isExporting
+                      : false;
+                  return ElevatedButton.icon(
+                    onPressed: isExporting
+                        ? null
+                        : () {
+                            if (state is! CountryLoadSuccess) return;
+                            _showExportScopeDialog(context, state);
+                          },
+                    icon: isExporting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.download,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                    label: Text(
+                      isExporting ? 'Đang xuất...' : 'Export CSV',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0D6EFD),
+                      disabledBackgroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -104,17 +128,16 @@ class _CountryViewState extends State<_CountryView> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TextField(
-                        // Gõ search -> gửi event lọc, KHÔNG tự lọc list local trong screen
                         onChanged: (value) {
-                          final currentFilter =
-                              (context.read<CountryBloc>().state
-                                      as CountryLoadSuccess)
-                                  .filter;
-                          context.read<CountryBloc>().add(
-                            ApplyFilterEvent(
-                              currentFilter.copyWith(keyword: value),
-                            ),
-                          );
+                          final state = context.read<CountryBloc>().state;
+                          if (state is CountryLoadSuccess) {
+                            final currentFilter = state.filter;
+                            context.read<CountryBloc>().add(
+                              ApplyFilterEvent(
+                                currentFilter.copyWith(keyword: value),
+                              ),
+                            );
+                          }
                         },
                         decoration: const InputDecoration(
                           hintText: 'Search countries...',
@@ -145,8 +168,6 @@ class _CountryViewState extends State<_CountryView> {
             ),
           ),
         ),
-        // BlocConsumer đặt NGOÀI cùng của body: builder để VẼ, listener để làm side-effect
-        // (toast, mở file...) — 2 việc tách biệt, không lẫn vào nhau.
         body: BlocConsumer<CountryBloc, CountryState>(
           listener: (context, state) {
             if (state is CountryLoadSuccess) {
@@ -163,14 +184,11 @@ class _CountryViewState extends State<_CountryView> {
               if (state.isSuccess == true) {
                 setState(() => showSuccessBox = true);
               } else if (state.isSuccess == false) {
-                setState(
-                  () => showSuccessBox = false,
-                ); // export lỗi -> chắc chắn KHÔNG hiện box success
+                setState(() => showSuccessBox = false);
               }
             }
           },
           builder: (context, state) {
-            // ===== 1. LOADING =====
             if (state is CountryLoading) {
               return const Center(
                 child: Padding(
@@ -180,7 +198,6 @@ class _CountryViewState extends State<_CountryView> {
               );
             }
 
-            // ===== 2. ERROR + RETRY =====
             if (state is CountryLoadFailure) {
               return Center(
                 child: Padding(
@@ -196,9 +213,10 @@ class _CountryViewState extends State<_CountryView> {
                       Text(state.message, textAlign: TextAlign.center),
                       const SizedBox(height: 12),
                       ElevatedButton(
-                        onPressed: () {},
-                        // =>                          context.read<CountryBloc>().add(RetryCountryEvent()),
-                        child: const Text('Retry'),
+                        onPressed: () {
+                          context.read<CountryBloc>().add(FetchCountryEvent());
+                        },
+                        child: const Text('Thử lại'),
                       ),
                     ],
                   ),
@@ -210,128 +228,130 @@ class _CountryViewState extends State<_CountryView> {
             if (state is CountryLoadSuccess) {
               final countries = state.countries; // <-- LIST THẬT từ Bloc
 
-              return ListView(
-                padding: const EdgeInsets.all(16.0),
-
-                children: [
-                  if (showPermissionBox) ...[
-                    _buildPermissionBox(context),
-                    const SizedBox(height: 16),
-                  ],
-                  if (showSuccessBox) _buildSuccessBox(state.exportPath),
-
-                  Text(
-                    'Total: ${countries.length} countries',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500,
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<CountryBloc>().add(RefreshCountryEvent());
+                  // RefreshIndicator requires a Future to show the spinner.
+                  // Since Bloc doesn't return a Future for events, we simulate a small delay
+                  // or wait until the state changes. For simplicity, just wait 1 second.
+                  await Future.delayed(const Duration(seconds: 1));
+                },
+                child: ListView(
+                  padding: const EdgeInsets.all(16.0),
+                  children: [
+                    if (showPermissionBox) ...[
+                      _buildPermissionBox(context),
+                      const SizedBox(height: 16),
+                    ],
+                    if (showSuccessBox) _buildSuccessBox(state.exportPath),
+                    Text(
+                      'Total: ${countries.length} countries',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // ===== EMPTY STATE =====
-                  if (countries.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 40),
-                      child: Center(
-                        child: Text('Không tìm thấy quốc gia nào.'),
-                      ),
-                    )
-                  else
-                    Card(
-                      color: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.grey.shade200),
-                      ),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: countries.length,
-                        separatorBuilder: (context, index) =>
-                            Divider(color: Colors.grey.shade100, height: 1),
-                        itemBuilder: (context, index) {
-                          final country = countries[index];
-                          return ListTile(
-                            leading: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                3,
-                              ), // chỉnh số này để bo nhiều/ít
-                              child: SizedBox(
-                                width: 32,
-                                height: 32,
-                                child:
-                                    (country.flagUrl != null &&
-                                        country.flagUrl!.trim().isNotEmpty)
-                                    ? SvgPicture.network(
-                                        country.flagUrl!,
-                                        fit: BoxFit
-                                            .cover, // đổi sang cover để lấp đầy khung bo góc, không để trắng viền
-                                        placeholderBuilder: (_) => Container(
-                                          color: Colors.grey.shade200,
-                                        ),
-                                        errorBuilder: (_, __, ___) => Container(
+                    const SizedBox(height: 12),
+                    if (countries.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 40),
+                        child: Center(
+                          child: Text('Không tìm thấy quốc gia nào.'),
+                        ),
+                      )
+                    else
+                      Card(
+                        color: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.grey.shade200),
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: countries.length,
+                          separatorBuilder: (context, index) =>
+                              Divider(color: Colors.grey.shade100, height: 1),
+                          itemBuilder: (context, index) {
+                            final country = countries[index];
+                            return ListTile(
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: SizedBox(
+                                  width: 32,
+                                  height: 32,
+                                  child:
+                                      (country.flagUrl != null &&
+                                          country.flagUrl!.trim().isNotEmpty)
+                                      ? SvgPicture.network(
+                                          country.flagUrl!,
+                                          fit: BoxFit.cover,
+                                          placeholderBuilder: (_) => Container(
+                                            color: Colors.grey.shade200,
+                                          ),
+                                          errorBuilder: (_, __, ___) =>
+                                              Container(
+                                                color: Colors.grey.shade200,
+                                                child: const Icon(
+                                                  Icons.flag_outlined,
+                                                  size: 16,
+                                                ),
+                                              ),
+                                        )
+                                      : Container(
                                           color: Colors.grey.shade200,
                                           child: const Icon(
                                             Icons.flag_outlined,
                                             size: 16,
                                           ),
                                         ),
-                                      )
-                                    : Container(
-                                        color: Colors.grey.shade200,
-                                        child: const Icon(
-                                          Icons.flag_outlined,
-                                          size: 16,
-                                        ),
-                                      ),
+                                ),
                               ),
-                            ),
-                            title: Text(
-                              country.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                              title: Text(
+                                country.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            subtitle: Text(
-                              country.capital,
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  country
-                                      .region!, // 'region', không phải 'continent' - khớp API
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
+                              subtitle: Text(
+                                country.capital,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    country.region!,
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 13,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.grey,
-                                  size: 20,
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      CountryDetailScreen(country: country),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        CountryDetailScreen(country: country),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 16),
-                ],
+                    const SizedBox(height: 16),
+                  ],
+                ),
               );
             }
 
@@ -443,28 +463,31 @@ class _CountryViewState extends State<_CountryView> {
           children: [
             const Icon(Icons.check_circle, color: Color(0xFF198754), size: 36),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Export successful',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'File CSV đã lưu.',
-                    style: TextStyle(color: Colors.black54, fontSize: 13),
+                    filePath != null
+                        ? 'Đã lưu file tại:\n${filePath.replaceAll('/storage/emulated/0/', '')}'
+                        : 'File CSV đã lưu.',
+                    style: const TextStyle(color: Colors.black54, fontSize: 13),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             OutlinedButton(
               onPressed: filePath == null
                   ? null
-                  : () =>
-                        context.read<CountryBloc>()
-                          ..add(OpenExportedFileEvent(filePath)),
+                  : () => context.read<CountryBloc>().add(
+                      ShareExportedFileEvent(filePath),
+                    ),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: Colors.grey.shade300),
                 shape: RoundedRectangleBorder(
@@ -472,7 +495,7 @@ class _CountryViewState extends State<_CountryView> {
                 ),
               ),
               child: const Text(
-                'View file',
+                'Chia sẻ',
                 style: TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
@@ -598,4 +621,178 @@ class _CountryViewState extends State<_CountryView> {
       },
     );
   }
+
+  void _showExportScopeDialog(BuildContext context, CountryLoadSuccess state) {
+  showDialog(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+        contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.file_download_rounded,
+                color: Colors.blue,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Phạm vi xuất',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Lựa chọn 1: Tất cả quốc gia
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.read<CountryBloc>().add(
+                         ExportCsvEvent(exportAll: true),
+                      );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.public,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Tất cả quốc gia',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${state.allCountries.length} quốc gia',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: Colors.grey.shade400,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Divider(height: 1),
+            ),
+            const SizedBox(height: 4),
+            // Lựa chọn 2: Kết quả hiện tại
+            Opacity(
+              opacity: state.countries.isNotEmpty ? 1.0 : 0.4,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: state.countries.isNotEmpty
+                      ? () {
+                          Navigator.pop(ctx);
+                          context.read<CountryBloc>().add(
+                                 ExportCsvEvent(exportAll: false),
+                              );
+                        }
+                      : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.filter_alt_outlined,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Kết quả hiện tại',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${state.countries.length} quốc gia',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 }
