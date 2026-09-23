@@ -5,6 +5,8 @@ import 'feed_event.dart';
 import 'feed_state.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
+  final FeedRepository _repo = FeedRepository();
+
   FeedBloc() : super(FeedInitial()) {
     on<FetchFeedEvent>(_onFetch);
     on<LoadMoreFeedEvent>(_onLoadMore);
@@ -14,11 +16,14 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   Future<void> _onFetch(FetchFeedEvent event, Emitter<FeedState> emit) async {
     emit(FeedLoading());
     try {
-      final items = await FeedRepository.getFeed(page: 1);
+      _repo.reset();
+      final items = await _repo.getNextPage(limit: 10);
       final cachedItem = await CacheService.getCachedFeed();
 
       final isOffline =
-          items.isNotEmpty && items.every((i) => cachedItem.contains(i));
+          items.isNotEmpty &&
+          items.every((i) => cachedItem.any((c) => c.id == i.id));
+
       emit(
         FeedLoaded(
           items: items,
@@ -28,7 +33,6 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         ),
       );
     } catch (e) {
-      // Lỗi → vẫn hiện cache
       final cached = await CacheService.getCachedFeed();
       emit(FeedError(message: e.toString(), cachedItems: cached));
     }
@@ -39,28 +43,35 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     Emitter<FeedState> emit,
   ) async {
     if (state is! FeedLoaded) return;
+    if (state is FeedLoadingMore) return; // Chặn concurrent request
     final current = state as FeedLoaded;
     if (!current.hasMore) return;
 
-    // Hiện loading ở cuối list
     emit(
       FeedLoadingMore(items: current.items, currentPage: current.currentPage),
     );
 
     try {
       final nextPage = current.currentPage + 1;
-      final newItems = await FeedRepository.getFeed(page: nextPage);
+      final newItems = await _repo.getNextPage(limit: 10);
+
+      // Lưu cache cộng dồn (thêm những item mới vào cache)
+      if (newItems.isNotEmpty) {
+        final allItems = [...current.items, ...newItems];
+        await CacheService.saveFeedItems(allItems);
+      }
 
       emit(
         current.copyWith(
           items: [...current.items, ...newItems],
           hasMore: newItems.length >= 10,
           currentPage: nextPage,
+          hasLoadMoreError: false,
         ),
       );
     } catch (e) {
-      // Load more lỗi → giữ nguyên list cũ
-      emit(current);
+      // Load more lỗi → đánh dấu lỗi, giữ nguyên list
+      emit(current.copyWith(hasLoadMoreError: true));
     }
   }
 
@@ -69,7 +80,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     Emitter<FeedState> emit,
   ) async {
     try {
-      final items = await FeedRepository.getFeed(page: 1);
+      _repo.reset();
+      final items = await _repo.getNextPage(limit: 10);
+
+      if (items.isNotEmpty) {
+        await CacheService.saveFeedItems(items);
+      }
+
       emit(FeedLoaded(items: items, currentPage: 1));
     } catch (e) {
       // Refresh lỗi → giữ nguyên state

@@ -11,7 +11,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/components/article_banner.dart';
-import 'package:flutterpractisetasks/push_notification/hard/services/notification_service.dart' as noti_service;
+import 'package:flutterpractisetasks/push_notification/hard/services/notification_service.dart'
+    as noti_service;
 
 class NewsHubScreen extends StatefulWidget {
   const NewsHubScreen({super.key});
@@ -103,6 +104,7 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
                 hasMore: state.hasMore,
                 isOffline: state.isOffline,
                 isLoadingMore: state is FeedLoadingMore,
+                hasLoadMoreError: state.hasLoadMoreError,
               ),
             };
           },
@@ -168,13 +170,14 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
     required bool hasMore,
     required bool isOffline,
     bool isLoadingMore = false,
+    bool hasLoadMoreError = false,
   }) {
     final bannerItems = items
         .where((item) => item.type == "article")
         .take(_bannerCount)
         .toList();
 
-    // Không hiển thị lại 6 bài đã nằm trong banner
+    // Không hiển thị lại bài đã nằm trong banner
     final remainingItems = items.skip(bannerItems.length).toList();
 
     return RefreshIndicator(
@@ -270,11 +273,12 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
             ),
           ),
 
-          if (hasMore || isLoadingMore)
+          if (hasMore || isLoadingMore || hasLoadMoreError)
             SliverToBoxAdapter(
               child: _buildLoadMoreSection(
                 context,
                 isLoadingMore: isLoadingMore,
+                hasLoadMoreError: hasLoadMoreError,
               ),
             ),
 
@@ -288,12 +292,32 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
   Widget _buildLoadMoreSection(
     BuildContext context, {
     required bool isLoadingMore,
+    required bool hasLoadMoreError,
   }) {
     if (isLoadingMore) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (hasLoadMoreError) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+        child: OutlinedButton.icon(
+          onPressed: () {
+            context.read<FeedBloc>().add(LoadMoreFeedEvent());
+          },
+          icon: const Icon(Icons.refresh, color: Colors.red),
+          label: const Text(
+            'Lỗi tải thêm, thử lại',
+            style: TextStyle(color: Colors.red),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.red),
+          ),
         ),
       );
     }

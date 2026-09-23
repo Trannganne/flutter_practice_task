@@ -108,7 +108,9 @@ class NotificationService {
       if (context != null) {
         ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
-            content: Text('${message.notification?.title ?? 'Bảng tin mới'}\n${message.notification?.body ?? ''}'),
+            content: Text(
+              '${message.notification?.title ?? 'Bảng tin mới'}\n${message.notification?.body ?? ''}',
+            ),
             leading: const Icon(Icons.notifications_active),
             actions: [
               TextButton(
