@@ -69,6 +69,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
           cameraPermission: _mapStatus(cameraStatus),
           locationPermission: _mapStatus(locationStatus),
           storagePermission: _mapStatus(storageStatus),
+          actionMessage: null,
         ),
       );
     } catch (e) {}
@@ -243,7 +244,6 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
       // Trả về đường dẫn
       final String result = await FileStorageService().exportCountriesToCsv(
         csvString,
-        'report',
       );
 
       emit(
@@ -425,7 +425,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
     emit(
       state.copyWith(
         cameraPermission: _mapStatus(result),
-        actionMessage: 'Đã cấp quyền truy cập camera',
+        actionMessage: _getPermissionMessage(result, 'máy ảnh'),
       ),
     );
   }
@@ -438,7 +438,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
     emit(
       state.copyWith(
         locationPermission: _mapStatus(result),
-        actionMessage: 'Đã cấp quyền truy cập vị trí',
+        actionMessage: _getPermissionMessage(result, 'vị trí'),
       ),
     );
   }
@@ -451,7 +451,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
     emit(
       state.copyWith(
         storagePermission: _mapStatus(result),
-        actionMessage: 'Đã cấp quyền lưu trữ',
+        actionMessage: _getPermissionMessage(result, 'lưu trữ'),
       ),
     );
   }
@@ -587,6 +587,18 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
         }
         return PermissionState.initial;
       }
+    }
+  }
+
+  String _getPermissionMessage(PermissionStatus status, String permissionName) {
+    if (status.isGranted) {
+      return 'Đã cấp quyền $permissionName.';
+    } else if (status.isDenied) {
+      return 'Bạn chưa cấp quyền $permissionName.';
+    } else if (status.isPermanentlyDenied) {
+      return 'Quyền $permissionName đã bị từ chối. Vui lòng mở Cài đặt để cấp quyền.';
+    } else {
+      return 'Trạng thái quyền $permissionName chưa xác định.';
     }
   }
 
