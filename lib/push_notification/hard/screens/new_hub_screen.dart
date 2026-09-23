@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutterpractisetasks/widgets/components/commonText.dart';
 import 'package:flutterpractisetasks/push_notification/hard/models/notification_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/screens/components/article_banner.dart';
+import 'package:flutterpractisetasks/push_notification/hard/services/notification_service.dart' as noti_service;
 
 class NewsHubScreen extends StatefulWidget {
   const NewsHubScreen({super.key});
@@ -28,6 +29,9 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
   void initState() {
     super.initState();
     _bannerPageController = PageController(viewportFraction: 1.0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      noti_service.NotificationService.consumePendingNavigation();
+    });
   }
 
   @override

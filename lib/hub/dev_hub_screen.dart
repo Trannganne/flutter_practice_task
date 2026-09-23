@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterpractisetasks/connectivity_check/connectivity_service.dart';
 import 'package:flutterpractisetasks/connectivity_check/cubit/connectivity_cubit.dart';
@@ -69,6 +70,48 @@ class _DevHubScreenState extends State<DevHubScreen> {
   // Đánh dấu module nào đang trong lúc khởi tạo (xin quyền + lấy FCM token...)
   // để hiển thị loading trên card và tránh người dùng bấm nhiều lần.
   String? _loadingKey;
+  String? _activeModuleKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _handleFCMIntegration();
+  }
+
+  void _handleFCMIntegration() async {
+    // Terminated
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      _processFCMMessage(initialMessage);
+    }
+    // Background tap
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _processFCMMessage(message);
+    });
+  }
+
+  void _processFCMMessage(RemoteMessage message) {
+    final type = message.data['type'];
+    if (type == 'fcm_hard') {
+      if (_activeModuleKey == 'push_hard') {
+        // Module is already active, NotificationService inside the module will handle it.
+        return;
+      }
+      
+      // Navigate to module
+      _openModule(
+        key: 'push_hard',
+        beforeOpen: () async {
+          await hard_push_noti.NotificationService.initialize();
+          // Store pending payload for the router to consume once ready
+          hard_push_noti.NotificationService.pendingNavigationPayload = message.data;
+          hard_push_noti.NotificationService.pendingNavigationPayload!['title'] = message.notification?.title;
+        },
+        title: 'Notification Center (Hard)',
+        routerConfig: hard_push_router.AppRoutes.createRouter(),
+      );
+    }
+  }
 
   Future<void> _openModule({
     required String key,
@@ -90,6 +133,7 @@ class _DevHubScreenState extends State<DevHubScreen> {
     }
 
     if (!mounted) return;
+    _activeModuleKey = key;
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ModuleHost(
@@ -99,6 +143,7 @@ class _DevHubScreenState extends State<DevHubScreen> {
         ),
       ),
     );
+    _activeModuleKey = null;
   }
 
   @override
