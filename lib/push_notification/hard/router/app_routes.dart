@@ -11,8 +11,9 @@ class AppRoutes {
 
   // Router hiện đang active — cập nhật mỗi khi ModuleHost mở module này
   static GoRouter? _activeRouter;
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   static GoRouter get router {
     if (_activeRouter == null) {
       throw StateError('Router chưa được khởi tạo. Gọi createRouter() trước.');

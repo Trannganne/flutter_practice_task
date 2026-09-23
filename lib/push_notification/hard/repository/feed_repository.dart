@@ -1,10 +1,17 @@
 import 'package:flutterpractisetasks/push_notification/hard/models/feed_item_model.dart';
 import 'package:flutterpractisetasks/push_notification/hard/services/news_service.dart';
 import 'package:flutterpractisetasks/push_notification/medium/models/articlesmodel.dart';
+import 'package:flutterpractisetasks/push_notification/medium/models/articlesmodel.dart';
 
 import '../services/post_service.dart';
 import '../services/cache_service.dart';
 import '../../../connectivity_check/connectivity_service.dart';
+
+class FeedResult {
+  final List<FeedItem> items;
+  final bool isOffline;
+  FeedResult({required this.items, required this.isOffline});
+}
 
 class FeedRepository {
   int _newsPage = 1;
@@ -24,7 +31,7 @@ class FeedRepository {
     _seenIds.clear();
   }
 
-  Future<List<FeedItem>> getNextPage({int limit = 10}) async {
+  Future<FeedResult> getNextPage({int limit = 10}) async {
     final hasInternet = await ConnectivityService().hasInternet();
 
     if (!hasInternet) {
@@ -33,7 +40,7 @@ class FeedRepository {
       final startIndex = _seenIds.length;
       final items = cached.skip(startIndex).take(limit).toList();
       _seenIds.addAll(items.map((e) => e.id));
-      return items;
+      return FeedResult(items: items, isOffline: true);
     }
 
     // Online fetch
@@ -94,6 +101,6 @@ class FeedRepository {
     final result = _buffer.sublist(0, resultCount);
     _buffer.removeRange(0, resultCount);
 
-    return result;
+    return FeedResult(items: result, isOffline: false);
   }
 }

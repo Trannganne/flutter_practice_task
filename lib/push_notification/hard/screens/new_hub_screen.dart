@@ -88,13 +88,14 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
 
               FeedLoading() => const Center(child: CircularProgressIndicator()),
 
-              FeedError(:final message, :final cachedItems) =>
+              FeedError(:final message, :final cachedItems, :final isOfflineError) =>
                 cachedItems.isNotEmpty
                     ? _buildList(
                         context,
                         cachedItems,
                         hasMore: false,
-                        isOffline: true,
+                        isOffline: isOfflineError,
+                        isErrorFallback: !isOfflineError,
                       )
                     : Center(child: Text(message)),
 
@@ -171,6 +172,7 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
     required bool isOffline,
     bool isLoadingMore = false,
     bool hasLoadMoreError = false,
+    bool isErrorFallback = false,
   }) {
     final bannerItems = items
         .where((item) => item.type == "article")
@@ -186,11 +188,11 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
       },
       child: CustomScrollView(
         slivers: [
-          if (isOffline)
+          if (isOffline || isErrorFallback)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                child: _buildOfflineBanner(),
+                child: _buildOfflineBanner(isErrorFallback: isErrorFallback),
               ),
             ),
 
@@ -493,21 +495,21 @@ class _NewsHubScreenState extends State<NewsHubScreen> {
     );
   }
 
-  Widget _buildOfflineBanner() {
+  Widget _buildOfflineBanner({bool isErrorFallback = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: isErrorFallback ? Colors.red.shade50 : Colors.orange.shade50,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(Icons.wifi_off, size: 14, color: Colors.orange.shade700),
+          Icon(isErrorFallback ? Icons.error_outline : Icons.wifi_off, size: 14, color: isErrorFallback ? Colors.red.shade700 : Colors.orange.shade700),
           const SizedBox(width: 6),
           Text(
-            'Offline — đang hiện dữ liệu đã lưu',
-            style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
+            isErrorFallback ? 'Lỗi máy chủ — đang hiện dữ liệu đã lưu' : 'Offline — đang hiện dữ liệu đã lưu',
+            style: TextStyle(fontSize: 11, color: isErrorFallback ? Colors.red.shade700 : Colors.orange.shade700),
           ),
         ],
       ),

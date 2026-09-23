@@ -60,8 +60,9 @@ class FeedLoadingMore extends FeedLoaded {
 class FeedError extends FeedState {
   final String message;
   final List<FeedItem> cachedItems;
-  const FeedError({required this.message, this.cachedItems = const []});
+  final bool isOfflineError;
+  const FeedError({required this.message, this.cachedItems = const [], this.isOfflineError = false});
 
   @override
-  List<Object?> get props => [message, cachedItems];
+  List<Object?> get props => [message, cachedItems, isOfflineError];
 }

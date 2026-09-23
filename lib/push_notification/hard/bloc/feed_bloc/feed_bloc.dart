@@ -17,18 +17,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     emit(FeedLoading());
     try {
       _repo.reset();
-      final items = await _repo.getNextPage(limit: 10);
-      final cachedItem = await CacheService.getCachedFeed();
-
-      final isOffline =
-          items.isNotEmpty &&
-          items.every((i) => cachedItem.any((c) => c.id == i.id));
-
+      final result = await _repo.getNextPage(limit: 10);
+      
       emit(
         FeedLoaded(
-          items: items,
-          hasMore: items.length >= 10,
-          isOffline: isOffline,
+          items: result.items,
+          hasMore: result.items.length >= 10,
+          isOffline: result.isOffline,
           currentPage: 1,
         ),
       );
@@ -47,13 +42,12 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     final current = state as FeedLoaded;
     if (!current.hasMore) return;
 
-    emit(
-      FeedLoadingMore(items: current.items, currentPage: current.currentPage),
-    );
+    emit(FeedLoadingMore(items: current.items, currentPage: current.currentPage));
 
     try {
       final nextPage = current.currentPage + 1;
-      final newItems = await _repo.getNextPage(limit: 10);
+      final result = await _repo.getNextPage(limit: 10);
+      final newItems = result.items;
 
       // Lưu cache cộng dồn (thêm những item mới vào cache)
       if (newItems.isNotEmpty) {
@@ -81,13 +75,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   ) async {
     try {
       _repo.reset();
-      final items = await _repo.getNextPage(limit: 10);
-
-      if (items.isNotEmpty) {
-        await CacheService.saveFeedItems(items);
+      final result = await _repo.getNextPage(limit: 10);
+      
+      if (result.items.isNotEmpty) {
+        await CacheService.saveFeedItems(result.items);
       }
 
-      emit(FeedLoaded(items: items, currentPage: 1));
+      emit(FeedLoaded(items: result.items, currentPage: 1, isOffline: result.isOffline));
     } catch (e) {
       // Refresh lỗi → giữ nguyên state
     }
