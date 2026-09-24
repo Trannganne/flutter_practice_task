@@ -5,6 +5,7 @@ import 'package:flutterpractisetasks/local_notification/hard/services/planner_hi
 import 'package:flutterpractisetasks/local_notification/medium/models/forecast.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 // Thêm 2 hằng số ID cho action( hiển cùng heads up)
 const String _actionIdDone = 'planner_done';
@@ -17,6 +18,7 @@ class NotificationService {
   static const int _scheduleId = 1;
   static const int _testId = 2;
   static const int _snoozeId = 3;
+  static const int _debugScheduleId = 99; // ID riêng cho test
   static bool _isInitialized = false;
 
   static Future<void> initialize() async {
@@ -90,7 +92,19 @@ class NotificationService {
         break;
 
       default:
-        break; // Tap vào thân notification, không phải nút action
+        // Tap vào thân notification
+        if (response.id != 99) {
+          await PlannerHistoryCacheservice.savePlannerHistory(
+            NotificationHistory(
+              title: 'Đã mở',
+              body: content,
+              time: DateTime.now(),
+              type: 'planner',
+              status: 'opened',
+            ),
+          );
+        }
+        break;
     }
   }
 
@@ -150,8 +164,8 @@ class NotificationService {
   // Schedule 8:00AM hằng ngày
   static Future<void> schedulePlanner(
     String content, {
-    int hour = 11,
-    int minute = 25,
+    int hour = 8,
+    int minute = 0,
   }) async {
     _notification.cancel(id: _scheduleId);
     final android = _notification
@@ -161,7 +175,14 @@ class NotificationService {
 
     await android?.requestExactAlarmsPermission();
 
-    final location = tz.getLocation('Asia/Ho_Chi_Minh');
+    String timeZoneName;
+    try {
+      timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      throw Exception('Không thể lấy timezone của thiết bị: $e');
+    }
+
+    final location = tz.getLocation(timeZoneName);
     final now = tz.TZDateTime.now(location);
 
     // Tính thời điểm tiếp theo
@@ -209,7 +230,13 @@ class NotificationService {
   }
 
   static Future<void> _scheduleSnooze(String content) async {
-    final location = tz.getLocation('Asia/Ho_Chi_Minh');
+    String timeZoneName;
+    try {
+      timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      throw Exception('Không thể lấy timezone của thiết bị: $e');
+    }
+    final location = tz.getLocation(timeZoneName);
     final now = tz.TZDateTime.now(location);
     // Demo để 2 phút
     final snoozeDate = now.add(const Duration(minutes: 2));
@@ -223,6 +250,43 @@ class NotificationService {
       notificationDetails: _plannerDetailsWithActions(),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       // Không set matchDateTimeComponents -> chỉ bắn 1 lần, khác với bản lặp hằng ngày
+    );
+  }
+
+  // --- HÀM TEST ĐẶT LỊCH ---
+  static Future<void> scheduleDebugPlanner(String content) async {
+    final android = _notification.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    await android?.requestExactAlarmsPermission();
+    final canSchedule = await android?.canScheduleExactNotifications();
+
+    String timeZoneName;
+    try {
+      timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      throw Exception('Không thể lấy timezone của thiết bị: $e');
+    }
+
+    final location = tz.getLocation(timeZoneName);
+    final now = tz.TZDateTime.now(location);
+    final scheduledDate = now.add(const Duration(minutes: 2));
+
+    print('--- TEST LOG ---');
+    print('Quyền Exact Alarm: $canSchedule');
+    print('Timezone thiết bị: $timeZoneName');
+    print('Giờ hiện tại: $now');
+    print('Lịch tiếp theo (test): $scheduledDate');
+    print('----------------');
+
+    await _notification.zonedSchedule(
+      id: _debugScheduleId,
+      title: 'Debug Planner Reminder',
+      body: content,
+      scheduledDate: scheduledDate,
+      payload: content,
+      notificationDetails: _plannerDetailsWithActions(),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 

@@ -51,3 +51,11 @@ class ToggleBackgroundSyncEvent extends PlannerEvent {
   @override
   List<Object?> get props => [isEnabled];
 }
+
+class ScheduleDebugPlannerEvent extends PlannerEvent {
+  final String content;
+  const ScheduleDebugPlannerEvent(this.content);
+
+  @override
+  List<Object?> get props => [content];
+}

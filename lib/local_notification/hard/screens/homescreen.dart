@@ -32,7 +32,13 @@ class _HardDashboardScreenState extends State<HardDashboardScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => context.pop(), // Quay lại Menu chính
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.goNamed('start');
+            }
+          },
         ),
         title: const Text(
           'Reminder Center',
@@ -122,7 +128,7 @@ class _HardDashboardScreenState extends State<HardDashboardScreen> {
           ReminderCard(
             title: 'Daily Activity',
             subtitle: state.planner.activity.activity,
-            timeInfo: 'Tomorrow, 8:00 AM',
+            timeInfo: _getScheduledTimeText(state.planner.activityEnabled),
             iconData: Icons.wb_sunny_outlined,
             iconColor: Colors.orange,
             isEnabled: state.planner.activityEnabled,
@@ -135,10 +141,8 @@ class _HardDashboardScreenState extends State<HardDashboardScreen> {
           const SizedBox(height: 12),
           ReminderCard(
             title: 'Umbrella Reminder',
-            subtitle: state.planner.notificationText.isNotEmpty
-                ? state.planner.notificationText
-                : 'Rain expected (${(state.planner.rainProbability * 100).round()}%)',
-            timeInfo: 'Today, 8:00 AM',
+            subtitle: 'Rain alert threshold: ${(state.planner.rainThreshold * 100).round()}%',
+            timeInfo: _getScheduledTimeText(state.planner.forecastEnabled),
             iconData: Icons.umbrella_outlined,
             iconColor: Colors.purpleAccent,
             isEnabled: state.planner.forecastEnabled,
@@ -188,6 +192,16 @@ class _HardDashboardScreenState extends State<HardDashboardScreen> {
         ],
       ),
     );
+  }
+
+  String _getScheduledTimeText(bool isEnabled) {
+    if (!isEnabled) return 'Đã tắt';
+    final now = DateTime.now();
+    if (now.hour < 8) {
+      return 'Today, 8:00 AM';
+    } else {
+      return 'Tomorrow, 8:00 AM';
+    }
   }
 
   Widget _buildHeader(int temp, String city, String icon) {

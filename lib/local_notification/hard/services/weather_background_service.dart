@@ -2,6 +2,7 @@ import 'package:flutterpractisetasks/local_notification/hard/services/notificati
 import 'package:flutterpractisetasks/local_notification/medium/service/locationservice.dart';
 import 'package:flutterpractisetasks/local_notification/medium/service/weather_api.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -25,7 +26,10 @@ void callbackDispatcher() {
             position.longitude,
           );
 
-          if (forecasts.maxRainProbabilityNext12h > 50) {
+          final prefs = await SharedPreferences.getInstance();
+          final threshold = prefs.getDouble('threshold') ?? 0.5;
+
+          if (forecasts.maxRainProbabilityNext12h >= threshold) {
             NotificationService.showTestNotification(forecasts);
           }
           break;

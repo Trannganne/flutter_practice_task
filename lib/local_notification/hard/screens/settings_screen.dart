@@ -4,6 +4,7 @@ import 'package:flutterpractisetasks/local_notification/hard/bloc/planner_bloc.d
 import 'package:flutterpractisetasks/local_notification/hard/bloc/planner_event.dart';
 import 'package:flutterpractisetasks/local_notification/hard/bloc/planner_state.dart';
 import 'package:flutterpractisetasks/widgets/components/apptoast.dart';
+import 'package:flutter/foundation.dart';
 
 class HardSettingsScreen extends StatelessWidget {
   const HardSettingsScreen({super.key});
@@ -120,6 +121,24 @@ class HardSettingsScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (kDebugMode)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent.withOpacity(0.2),
+                        foregroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.all(16),
+                      ),
+                      icon: const Icon(Icons.bug_report),
+                      label: const Text('Test lịch sau 2 phút'),
+                      onPressed: () {
+                        context.read<PlannerBloc>().add(
+                          ScheduleDebugPlannerEvent(planner.notificationText),
+                        );
+                      },
+                    ),
+                  ),
               ],
             );
           }

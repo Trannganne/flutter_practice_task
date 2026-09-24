@@ -21,6 +21,8 @@ import 'package:flutterpractisetasks/local_notification/medium/service/rain_dete
 import 'package:flutterpractisetasks/local_notification/medium/service/weather_api.dart';
 import '../models/planner_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   PlannerBloc() : super(PlannerInitial()) {
@@ -31,6 +33,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<ToggleUmbrellaReminderEvent>(_onToggleUmbrellaReminder);
     on<UpdateRainThresholdEvent>(_onUpdateThreshold);
     on<ToggleBackgroundSyncEvent>(_onToggleBackgroundSync);
+    on<ScheduleDebugPlannerEvent>(_onScheduleDebugPlanner);
   }
 
   // Khai báo key cho share prefs
@@ -108,7 +111,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         final text = _buildNotification(
           activityCached,
           forecastCached,
-          forecastCached.maxRainProbabilityNext12h >= 50,
+          forecastCached.maxRainProbabilityNext12h >= threshold,
         );
         final convert = PlannerHelper();
         final planner = convert.convertToPlanner(
@@ -145,6 +148,16 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   //   );
   //   emit(current.copyWith(actionMessage: 'Đã gửi thông báo thử nghiệm!'));
   // }
+
+  Future<void> _onScheduleDebugPlanner(
+    ScheduleDebugPlannerEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    if (state is! PlannerLoadSuccess) return;
+    final current = state as PlannerLoadSuccess;
+    await local_planner_notifi.NotificationService.scheduleDebugPlanner(event.content);
+    emit(current.copyWith(actionMessage: 'Đã đặt lịch thử sau 2 phút!'));
+  }
 
   Future<void> _onRetryPlanner(
     RetryPlannerEvent event,
@@ -317,12 +330,34 @@ Have a nice day!       ''';
     bool isForecast,
     bool result,
   ) async {
+    // Calculate scheduled time (next 8:00 AM)
+    String timeZoneName;
+    try {
+      timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      timeZoneName = 'Asia/Ho_Chi_Minh';
+    }
+    final location = tz.getLocation(timeZoneName);
+    final now = tz.TZDateTime.now(location);
+    var scheduledDate = tz.TZDateTime(
+      location,
+      now.year,
+      now.month,
+      now.day,
+      8,
+      0,
+      0,
+    );
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
     if (isAct && isForecast) {
       final body = _buildNotification(activity, forecast, result);
       local_planner_notifi.NotificationService.schedulePlanner(
         body,
-        hour: 14,
-        minute: 53,
+        hour: 8,
+        minute: 0,
       );
       await PlannerHistoryCacheservice.savePlannerHistory(
         NotificationHistory(
@@ -330,22 +365,26 @@ Have a nice day!       ''';
           body: body,
           time: DateTime.now(),
           type: 'planner',
+          status: 'scheduled',
+          scheduledTime: scheduledDate,
         ),
       );
     } else {
       if (!isAct && isForecast) {
         local_weather_notifi.NotificationService.scheduleUmbrella(
           forecast.maxRainProbabilityNext12h,
-          hour: 14,
-          minute: 35,
+          hour: 8,
+          minute: 0,
         );
         await PlannerHistoryCacheservice.savePlannerHistory(
           NotificationHistory(
             title: 'Rain Umbrella Reminder',
             body:
-                ' Dựa báo mưa lên đến ${forecast.maxRainProbabilityNext12h * 100}%.\n Đừng quên mang ô khi ra ngoài!',
+                ' Dựa báo mưa lên đến ${(forecast.maxRainProbabilityNext12h * 100).round()}%.\n Đừng quên mang ô khi ra ngoài!',
             time: DateTime.now(),
             type: 'weather',
+            status: 'scheduled',
+            scheduledTime: scheduledDate,
           ),
         );
       } else {
@@ -358,6 +397,8 @@ Have a nice day!       ''';
             body: activity.activity,
             time: DateTime.now(),
             type: 'activity',
+            status: 'scheduled',
+            scheduledTime: scheduledDate,
           ),
         );
       }

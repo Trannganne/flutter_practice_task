@@ -5,6 +5,7 @@ class NotificationHistory {
   final String type;
   // Note: Khi cần sự xác nhận thì nhớ thêm vào phần model để có thể update lại
   final String status;
+  final DateTime? scheduledTime;
 
   NotificationHistory({
     required this.title,
@@ -12,6 +13,7 @@ class NotificationHistory {
     required this.time,
     required this.type,
     this.status = 'sent',
+    this.scheduledTime,
   });
 
   Map<String, dynamic> toJson() => {
@@ -20,6 +22,7 @@ class NotificationHistory {
     'time': time.toIso8601String(),
     'type': type,
     'status': status,
+    if (scheduledTime != null) 'scheduledTime': scheduledTime!.toIso8601String(),
   };
 
   factory NotificationHistory.fromJson(Map<String, dynamic> json) {
@@ -29,6 +32,9 @@ class NotificationHistory {
       time: DateTime.parse(json['time']),
       type: json['type'],
       status: json['status'] ?? 'sent',
+      scheduledTime: json['scheduledTime'] != null
+          ? DateTime.parse(json['scheduledTime'])
+          : null,
     );
   }
 }

@@ -108,7 +108,9 @@ class HardHistoryScreen extends StatelessWidget {
                 const SizedBox(height: 6),
 
                 Text(
-                  DateFormat('dd/MM/yyyy HH:mm').format(item.time),
+                  item.status == 'scheduled' && item.scheduledTime != null
+                      ? 'Dự kiến: ${DateFormat('dd/MM/yyyy HH:mm').format(item.scheduledTime!.toLocal())}'
+                      : DateFormat('dd/MM/yyyy HH:mm').format(item.time.toLocal()),
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
@@ -142,18 +144,24 @@ class HardHistoryScreen extends StatelessWidget {
   IconData _statusIcon(String status) => switch (status) {
     'done' => Icons.check_circle,
     'snoozed' => Icons.snooze,
+    'scheduled' => Icons.schedule,
+    'opened' => Icons.drafts,
     _ => Icons.check_circle_outline,
   };
 
   Color _statusColor(String status) => switch (status) {
     'done' => Colors.green,
     'snoozed' => Colors.orangeAccent,
+    'scheduled' => Colors.blueAccent,
+    'opened' => Colors.lightGreen,
     _ => Colors.grey,
   };
 
   String _statusLabel(String status) => switch (status) {
     'done' => 'Done',
     'snoozed' => 'Snoozed',
+    'scheduled' => 'Đã đặt lịch',
+    'opened' => 'Đã mở',
     _ => 'Sent',
   };
 }
