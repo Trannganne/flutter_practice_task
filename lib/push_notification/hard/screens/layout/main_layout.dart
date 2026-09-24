@@ -44,13 +44,14 @@ class MainLayout extends StatelessWidget {
           ? CommonBottomNav(
               currentIndex: currentIndex,
               onTap: (index) {
+                if (index == currentIndex) return;
                 switch (index) {
                   case 0:
-                    context.push(AppRoutes.newHub);
+                    context.go(AppRoutes.newHub);
                     break;
 
                   case 3:
-                    context.push(AppRoutes.notifications);
+                    context.go(AppRoutes.notifications);
                     break;
                 }
               },

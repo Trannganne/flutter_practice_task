@@ -21,7 +21,7 @@ class CommonBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double navHeight = 56;
+    const double navHeight = 64;
     const double barHeight = 64;
     const double labelFontSize = 10;
 
@@ -51,6 +51,7 @@ class CommonBottomNav extends StatelessWidget {
                 final selected = currentIndex == index;
 
                 return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () {
                     onTap(index);
                   },
@@ -59,9 +60,9 @@ class CommonBottomNav extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
                             item.icon,
                             color: selected
                                 ? Appcolor.textSecondary
