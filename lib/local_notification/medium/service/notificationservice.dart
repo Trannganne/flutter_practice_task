@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notification =
@@ -51,8 +52,8 @@ class NotificationService {
 
   static Future<void> scheduleUmbrella(
     double pop, {
-    int hour = 14,
-    int minute = 35,
+    int hour = 8,
+    int minute = 0,
   }) async {
     await _notification.cancel(id: _scheduleId);
 
@@ -62,7 +63,13 @@ class NotificationService {
         >();
     await android?.requestExactAlarmsPermission();
 
-    final location = tz.getLocation('Asia/Ho_Chi_Minh');
+    String timeZoneName;
+    try {
+      timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      throw Exception('Không thể lấy timezone thiết bị: $e');
+    }
+    final location = tz.getLocation(timeZoneName);
     final now = tz.TZDateTime.now(location);
 
     var scheduledDate = tz.TZDateTime(

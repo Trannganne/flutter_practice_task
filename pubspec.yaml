@@ -48,6 +48,7 @@ dependencies:
   mime: ^2.0.0
   chewie: ^1.14.1
   wakelock_plus: ^1.6.1
+  flutter_timezone: ^5.1.0
 
 dev_dependencies:
   flutter_test:

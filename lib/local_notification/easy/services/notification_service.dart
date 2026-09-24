@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notification =
@@ -64,7 +65,13 @@ class NotificationService {
   static Future<void> scheduleDailyAt8AM(String activityText) async {
     _notification.cancel(id: _scheduleId);
 
-    final location = tz.getLocation('Asia/Ho_Chi_Minh');
+    String timeZoneName;
+    try {
+      timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (e) {
+      throw Exception('Không thể lấy timezone thiết bị: $e');
+    }
+    final location = tz.getLocation(timeZoneName);
     final now = tz.TZDateTime.now(location);
 
     // Tính thời điểm 8:00 tiếp theo
@@ -73,8 +80,8 @@ class NotificationService {
       now.year,
       now.month,
       now.day,
-      11,
-      25,
+      8,
+      0,
       0,
     );
 
